@@ -1,8 +1,10 @@
-<html>
-<head>
-<title>Aangegeven volgorde</title>
-</head>
-<body>
+<?php
+useLib('htmlpage');
+
+//generate page header
+fw_header('Suggesties');
+?>
 <p>U heeft aangegeven muziekgenres leuk te vinden in de volgende volgorde: <?=$_POST['sorted']?></p>
-</body>
-</html>
+<?php
+fw_footer();
+?>
