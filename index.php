@@ -1,47 +1,60 @@
 <?php
-//Olaf Maas - 2011
-//Create database connection
-
-
+// Functie getRating zorgt voor het opvragen van de rating van een bepaalde artiest.
 function getRating($mbid) {
+	// De query voor het opvragen van de rating op MusicBrainz.
 	$r = new HttpRequest('http://musicbrainz.org/ws/1/artist/'.$mbid.'?inc=ratings');
 	try {
-    $r->send();
-    if ($r->getResponseCode() == 200) {
-				$xmlResponse = simplexml_load_string($r->getResponseBody());
-				$hallo = $xmlResponse->children();
-				$hallo = $hallo->children();
-				return $hallo->rating;
+		$r->send();
+		if ($r->getResponseCode() == 200) {
+			// Ouput is een XML bestand, die wordt ingelezen dmv de SimpleXML methode.
+			$xmlResponse = simplexml_load_string($r->getResponseBody());
+			$response = $xmlResponse->children();
+			$response = $response->children();
+			// Uit het XML bestand wordt het onderdeel rating opgevraagd, deze wordt vervolgens teruggegeven.
+			return $response->rating;
     }
-} catch (HttpException $ex) {
-    return null;
-}
+	} catch (HttpException $ex) {
+		return null;
+	}
 }
 
+// Inloggegevens voor de database
 $user="root";
 $host="localhost";
 $dbname="musicdat";
 
-//Execute first query and fetch results
+// Connectie maken met de database. 
 $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=UTF-8", $user);
-$q=$conn->prepare("INSERT INTO artistrating VALUES(:id,:rating, :number)");
+// In deze eerste fase wordt er nog niets opgeslagen van een specifieke gebruiker. Vandaar is ervoor gekozen de database simpelweg elke keer leeg te gooien. Dit zal in latere versies uiteraard worden aangepast.
+$truncate = $conn->prepare("TRUNCATE TABLE artistrating");
+$truncate->execute();
+
+// Query opstellen waarbij de artiest id en de rating worden toegevoegd aan de database
+$q=$conn->prepare("INSERT INTO artistrating (id,rating) VALUES(:id,:rating)");
 $q->bindParam(':id', $id, PDO::PARAM_STR);
-$q->bindParam(':rating', $rating, PDO::PARAM_INT );
-$q->bindParam(':number', $i, PDO::PARAM_INT );
-$tag=array(1=>"country",2=>"blues",3=>"pop",4=>"alternative",5=>"rock");
+$q->bindParam(':rating', $rating, PDO::PARAM_INT);
+
+// De array met tags
+$tag=array(0=>"country",2=>"blues",3=>"pop",4=>"alternative",5=>"rock");
+
+// In deze forloop wordt per genre een query op de musicbrainz dataset gevuurd.
 for($i = 1; $i<=5; $i++) {
 	$r = new HttpRequest('http://musicbrainz.org/ws/2/artist/?query=tag:'.$tag[$i]);
 	try {
 		$r->send();
 		if ($r->getResponseCode() == 200) {
 			$xmlResponse = simplexml_load_string($r->getResponseBody());
-			$hallo = $xmlResponse->children();
-			$hallo = $hallo->children();
-			foreach($hallo as $child){
+			$response = $xmlResponse->children();
+			$response = $response->children();
+			// Voor elke artiest die hieruit volgt, wordt de rating opgehaald met de getRating functie.
+			foreach($response as $child){
 				$id=$child->attributes()->id;
-				echo $child->attributes()->id;
-				$rating=getRating($child->attributes()->id);
-				print($id." : ".$rating."<br/>");
+				$rat=getRating($child->attributes()->id);
+				// De rating wordt vervolgens gewogen.
+				$rating=($rat+0)*(5-$i);
+				// En de artiest - rating koppel in de database opgeslagen.
+				
+				//TODO : dubbele artiesten samen laten voegen!
 				$q->execute();					
 			}
 		}
@@ -49,20 +62,21 @@ for($i = 1; $i<=5; $i++) {
 		echo $ex;
 	}
 }
-
-$q=$conn->prepare("SELECT id, rating*(5-number) AS rat FROM artistrating ORDER BY rat DESC LIMIT 10");
+// Uit de database de 1e 10 rijen gesorteerd op waardering opvragen
+$q=$conn->prepare("SELECT id, rating FROM artistrating ORDER BY rating DESC LIMIT 10");
 $q->execute();
+$resultArray = $q->fetchAll();
 
-$query2= $conn->prepare("SELECT artist_name FROM artist WHERE mb_id=:id");
+// Vervolgens deze data koppelen met de data van artiesten die in de database zit. 
+$query2= $conn->prepare("SELECT * FROM artist WHERE mb_id=:id");
 $query2->bindParam(":id", $id);
 
-$resultArray = $q->fetchAll();
+// Nu middels een forloop het resultaat van de artiesten tonen aan de gebruiker.
 for ( $j = 0; $j < count($resultArray); $j++) {
 	$id = $resultArray[$j]["id"];
 	$query2->execute();
-	echo $query2->fetch();
+	$res = $query2->fetch();
+	echo $res["artist_name"]." : ".$res["mb_id"]."<br/>";
 }
-
-
 
 ?>
