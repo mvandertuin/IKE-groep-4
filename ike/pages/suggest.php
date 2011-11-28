@@ -8,7 +8,6 @@ fw_header('Suggesties');
 <p>U heeft aangegeven muziekgenres leuk te vinden in de volgende volgorde: <?=$_POST['sorted']?></p>
 <p>Dit levert de volgende lijst met aanbevolen artiesten op:</p>
 <?php
-error_reporting(E_ALL);
 // Functie getRating zorgt voor het opvragen van de rating van een bepaalde artiest.
 function getRating($mbid) {
 	// De query voor het opvragen van de rating op MusicBrainz.
