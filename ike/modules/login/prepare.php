@@ -22,7 +22,7 @@ if($q->fetch()){
 	if(time()<$valid){
 		$session['loginID'] = $uid;
 		$session['storage'] = $storage;
-		$q3 = $db->prepare("SELECT naam, type FROM ".$db_tableprefix."user WHERE bcpuID = :userid");
+		$q3 = $db->prepare("SELECT naam, type FROM ".$db_tableprefix."users WHERE bcpuID = :userid");
 		$q3->bindParam(':userid', $uid);
 		$q3->execute();
 		$q3->bindColumn('naam',$naam);
@@ -54,20 +54,27 @@ $session['sid'] = session_id();
 function login($email, $pass){
 	global $db;
 	global $session;
-	$q1 = $db->prepare("SELECT * FROM ".$db_tableprefix."user WHERE email = :email LIMIT 1");
+	global $db_tableprefix;
+	$q1 = $db->prepare("SELECT * FROM ".$db_tableprefix."users WHERE email = :email LIMIT 1");
 	$q1->bindParam(':email', $email);
-	$q1->execute();
-	$q1->store_result();
-	$q1->bindColumn('ID',$uid);
+	if(!$q1->execute()){
+	  var_dump($q1->errorInfo());
+	}
+	//$q1->store_result();
+	$q1->bindColumn('uID',$uid);
 	$q1->bindColumn('naam',$naam);
 	$q1->bindColumn('email',$email);
-	$q1->bindColumn('wachtwoord',$type);
+	$q1->bindColumn('wachtwoord',$codewachtwoord);
+	$q1->bindColumn('type',$type);
 	$q1->bindColumn('validated',$validated);
-	if(!$q1->fetch()){
+	echo 'd';
+	if(!$q1->fetch(PDO::FETCH_BOUND)){
 		return false;
 	}
-	$q1->close();
+	//$q1->close();
+	echo 'b';
 	if(hashPassword($uid, $pass)==$codewachtwoord){
+		echo 'c';
 		$q2 = $db->prepare("INSERT INTO ".$db_tableprefix."session (bcpuID, sessID, valid, storage) VALUES (:uid, :session, :valid, :storage");
 		$sid = $session['sid'];
 		$valtime = time()+900;
@@ -81,7 +88,7 @@ function login($email, $pass){
 		$q2->bindParam(':storage', $storage);
 		//$q2->bind_param('isis', $uid, $sid, $valtime, $storage);
 		$q2->execute();
-		$q2->close();
+		//$q2->close();
 		$session['loginID']=$uid;
 		$session['userType']=$type;
 		$session['userName']=$naam;
@@ -92,6 +99,7 @@ function login($email, $pass){
 function logout(){
 	global $db;
 	global $session;
+	global $db_tableprefix;
 	$q = $db->prepare("DELETE FROM ".$db_tableprefix."session WHERE sessID = :session LIMIT 1");
 	$id = $session['sid'];
 	$q->bindParam(':session', $id);
