@@ -53,7 +53,6 @@ $r = new HttpRequest('http://musicbrainz.org/ws/2/artist/'.$mbid.'?inc=url-rels'
 	}
 }
 
-
 try{
 // In deze eerste fase wordt er nog niets opgeslagen van een specifieke gebruiker. Vandaar is ervoor gekozen de database simpelweg elke keer leeg te gooien. Dit zal in latere versies uiteraard worden aangepast.
 $truncate = $db->prepare("TRUNCATE TABLE artistrating");
@@ -71,7 +70,6 @@ $tag = array_slice($tagbrei, 0, 3);
 // In deze forloop wordt per genre een query op de musicbrainz dataset gevuurd.
 for($i = 0; $i<3; $i++) {
 	try {
-		print_r($tag);
 		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=".$tag[$i]."&api_key=184af8b6220039e4cb8167a5e2bb23e3");
 		//$r = new HttpRequest('http://musicbrainz.org/ws/2/artist/?query=tag:'.$tag[$i].'&limit=20');
 		$h= $r->getHeaders();
@@ -107,9 +105,8 @@ $resultArray = $q->fetchAll();
 echo "<ul>";
 for ( $j = 0; $j < count($resultArray); $j++) {
 	echo "<li>".$resultArray[$j]["artistname"];
-	//Daarnaast voor elk resultaat ook de links van de artiest tonen.
-	$links = getLink($resultArray[$j]["id"]);
 	echo "<ul>";
+	$links = getLink($resultArray[$j]["id"]);
 	foreach($links as $name => $target){
 		echo "<li><a href=".$target.">".$name."</a></li>";
 	}
@@ -117,7 +114,51 @@ for ( $j = 0; $j < count($resultArray); $j++) {
 	
 	
 }
+
+
+
 echo "</ul>";
+echo "De artiesten die u leuk vind zijn:";
+$artists = explode(",", $_POST['artist']);
+echo "<ul>";
+foreach($artists as $artist){
+	echo "<li>".$artist."</li>";
+}
+echo "</ul>";
+echo "En de artiesten die daar op lijken zijn:";
+echo "<ul>";
+foreach($artists as $artist){
+	try {
+		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=".$artist."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+		
+		$h= $r->getHeaders();
+		$h['User-Agent'] = 'php44';
+		$r->setHeaders($h);
+		//sleep(10);
+		$r->send();
+		if ($r->getResponseCode() == 200) {
+			$xmlResponse = simplexml_load_string($r->getResponseBody());
+			$response = $xmlResponse->children();
+			$response = $response->children();
+			// Voor elke artiest die hieruit volgt, wordt de rating opgehaald met de getRating functie.
+			foreach($response as $child){
+				$name=$child->name;
+				echo "<li>".$name;
+				$links = getLink($child->mbid);
+				echo "<ul>";
+				foreach($links as $name => $target){
+					echo "<li><a href=".$target.">".$name."</a></li>";
+				}
+				echo "</ul></li>";
+				
+			}
+		}
+	} catch (HttpException $ex) {
+		echo $ex;
+	}
+}
+echo "</ul>";
+
 }catch(Exception $e){
 	var_dump($e);	
 }
