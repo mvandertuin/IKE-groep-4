@@ -53,115 +53,154 @@ $r = new HttpRequest('http://musicbrainz.org/ws/2/artist/'.$mbid.'?inc=url-rels'
 	}
 }
 
+function getArtistsByTag($tags) {
 try{
-// In deze eerste fase wordt er nog niets opgeslagen van een specifieke gebruiker. Vandaar is ervoor gekozen de database simpelweg elke keer leeg te gooien. Dit zal in latere versies uiteraard worden aangepast.
-$truncate = $db->prepare("TRUNCATE TABLE artistrating");
-$truncate->execute();
-
-// Query opstellen waarbij de artiest id en de rating worden toegevoegd aan de database
-$q=$db->prepare("INSERT INTO artistrating (id,rating,artistname) VALUES(:id,:rating, :artistname)");
-$q->bindParam(':id', $id, PDO::PARAM_STR);
-$q->bindParam(':rating', $rating, PDO::PARAM_INT);
-$q->bindParam(':artistname', $name, PDO::PARAM_STR);
-
-// De array met tags
-$tagbrei = explode(',',$_POST['sorted']);
-$tag = array_slice($tagbrei, 0, 3);
-// In deze forloop wordt per genre een query op de musicbrainz dataset gevuurd.
-for($i = 0; $i<3; $i++) {
-	try {
-		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=".$tag[$i]."&api_key=184af8b6220039e4cb8167a5e2bb23e3");
-		//$r = new HttpRequest('http://musicbrainz.org/ws/2/artist/?query=tag:'.$tag[$i].'&limit=20');
-		$h= $r->getHeaders();
-		$h['User-Agent'] = 'IKE G4 0.1';
-		$r->setHeaders($h);
-		$r->send();
-		if ($r->getResponseCode() == 200) {
-			$xmlResponse = simplexml_load_string($r->getResponseBody());
-			$response = $xmlResponse->children();
-			$response = $response->children();
-			// Voor elke artiest die hieruit volgt, wordt de rating opgehaald met de getRating functie.
-			foreach($response as $child){
-				$id=$child->mbid;
-				$name=$child->name;
-				//$rat=getRating($child->attributes()->id);
-				$rat=$child->attributes()->rank;
-				// De rating wordt vervolgens gewogen.
-				$rating=($rat+0)*(5-$i);
-				// En de artiest - rating koppel in de database opgeslagen.
-				$q->execute();				
+	
+	// In deze forloop wordt per genre een query op de musicbrainz dataset gevuurd.
+	for($i = 0; $i<3; $i++) {
+		try {
+			$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=".$tags[$i]."&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+			$h= $r->getHeaders();
+			$h['User-Agent'] = 'IKE G4 0.1';
+			$r->setHeaders($h);
+			$r->send();
+			if ($r->getResponseCode() == 200) {
+				$xmlResponse = simplexml_load_string($r->getResponseBody());
+				$response = $xmlResponse->children();
+				$response = $response->children();
+				$res=array();		
+				foreach($response as $child){
+					$res[]=$child->mbid;			
+				}
+				return $res;
 			}
-		}
-	} catch (HttpException $ex) {
+		} catch (HttpException $ex) {
 		echo $ex;
 	}
 }
-// Uit de database de 1e 10 rijen gesorteerd op waardering opvragen
-$q=$db->prepare("SELECT id, rating, artistname FROM artistrating WHERE rating>0 ORDER BY rating DESC LIMIT 10");
-$q->execute();
-$resultArray = $q->fetchAll();
+
+function getAlbumByArtist($artist) {
+	//TODO Last.fm => TopAlbums
+
+	//Return array met naam + mbid
+}
+
+function getAlbumImage($album) {
+	// $album is mbid
+	// TODO Last.fm
+	
+	// Return 1 image -> url
+}
+
+function getArtistName($artist) {
+	// TODO
+	
+	// Via MusicBrainz. $artist == mbid.
+	// Return string
+}
+
+function outputTags($tags) {
+	$artists = getArtistByTag($tags);
+	foreach($artists as $a){
+		$mbid = $a;
+		$name = getArtistName($artist);
+		$album = getAlbumByArtist($artist);
+		$image = getAlbumImage($album["mbid"]);
+	?>
+	<table border="1">
+		<tr>
+			<th colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
+		</tr>
+		<tr>
+			<td><img src="<?=$image ?>"></td>
+			<td>
+				<ul>
+					<?php 
+						$links = getLink($mbid);
+						foreach($links as $name => $target){
+							echo "<li><a href=".$target.">".$name."</a></li>";
+						}
+					?>
+				</ul>	
+			</td>
+		</tr>
+	</table>
+	<?php
+	}
+}
+
+	// De array met tags
+	$tagbrei = explode(',',$_POST['sorted']);	
+	$tags = array_slice($tagbrei, 0, 3);
+	outputTags($tags);
+	
+	
+// ALLES HIERONDER NOG UITZOEKEN!!!!!
+
+
+	
 
 // Nu middels een forloop het resultaat van de artiesten tonen aan de gebruiker.
-echo "<ul>";
-for ( $j = 0; $j < count($resultArray); $j++) {
-	echo "<li>".$resultArray[$j]["artistname"];
-	echo "<ul>";
-	$links = getLink($resultArray[$j]["id"]);
-	foreach($links as $name => $target){
-		echo "<li><a href=".$target.">".$name."</a></li>";
-	}
-	echo "</ul></li>";
+// echo "<ul>";
+// for ( $j = 0; $j < count($resultArray); $j++) {
+	// echo "<li>".$resultArray[$j]["artistname"];
+	// echo "<ul>";
+	// $links = getLink($resultArray[$j]["id"]);
+	// foreach($links as $name => $target){
+		// echo "<li><a href=".$target.">".$name."</a></li>";
+	// }
+	// echo "</ul></li>";
 	
 	
-}
+// }
 
 
 
-echo "</ul>";
-echo "De artiesten die u leuk vind zijn:";
-$artists = explode(",", $_POST['artist']);
-echo "<ul>";
-foreach($artists as $artist){
-	echo "<li>".$artist."</li>";
-}
-echo "</ul>";
-echo "En de artiesten die daar op lijken zijn:";
-echo "<ul>";
-foreach($artists as $artist){
-	try {
-		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=".$artist."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+// echo "</ul>";
+// echo "De artiesten die u leuk vind zijn:";
+// $artists = explode(",", $_POST['artist']);
+// echo "<ul>";
+// foreach($artists as $artist){
+	// echo "<li>".$artist."</li>";
+// }
+// echo "</ul>";
+// echo "En de artiesten die daar op lijken zijn:";
+// echo "<ul>";
+// foreach($artists as $artist){
+	// try {
+		// $r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=".$artist."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
 		
-		$h= $r->getHeaders();
-		$h['User-Agent'] = 'php44';
-		$r->setHeaders($h);
+		// $h= $r->getHeaders();
+		// $h['User-Agent'] = 'php44';
+		// $r->setHeaders($h);
 		//sleep(10);
-		$r->send();
-		if ($r->getResponseCode() == 200) {
-			$xmlResponse = simplexml_load_string($r->getResponseBody());
-			$response = $xmlResponse->children();
-			$response = $response->children();
-			// Voor elke artiest die hieruit volgt, wordt de rating opgehaald met de getRating functie.
-			foreach($response as $child){
-				$name=$child->name;
-				echo "<li>".$name;
-				$links = getLink($child->mbid);
-				echo "<ul>";
-				foreach($links as $name => $target){
-					echo "<li><a href=".$target.">".$name."</a></li>";
-				}
-				echo "</ul></li>";
+		// $r->send();
+		// if ($r->getResponseCode() == 200) {
+			// $xmlResponse = simplexml_load_string($r->getResponseBody());
+			// $response = $xmlResponse->children();
+			// $response = $response->children();
+			//Voor elke artiest die hieruit volgt, wordt de rating opgehaald met de getRating functie.
+			// foreach($response as $child){
+				// $name=$child->name;
+				// echo "<li>".$name;
+				// $links = getLink($child->mbid);
+				// echo "<ul>";
+				// foreach($links as $name => $target){
+					// echo "<li><a href=".$target.">".$name."</a></li>";
+				// }
+				// echo "</ul></li>";
 				
-			}
-		}
-	} catch (HttpException $ex) {
-		echo $ex;
-	}
-}
-echo "</ul>";
+			// }
+		// }
+	// } catch (HttpException $ex) {
+		// echo $ex;
+	// }
+// }
+// echo "</ul>";
 
-}catch(Exception $e){
-	var_dump($e);	
-}
+// }catch(Exception $e){
+	// var_dump($e);	
+// }
 
 fw_footer();
 ?>

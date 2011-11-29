@@ -2,9 +2,11 @@
 useLib('constants');
 $count = 1;
 $inputs = $list = '';
+$keys = array();
 foreach($genres as $key=>$value){
-	$list.='<li id="'.$key.'" class="sortable"><img src="images/arrow.png" alt="move" width="16" height="16" class="handle" />'.$value.'</li>';
+	$list.='<li id="'.$key.'" class="sortable"><img src="'.$frameworkRoot.'images/arrow.png" alt="move" width="16" height="16" class="handle" />'.$value.'</li>';
 	$count++;
+	$keys[] = $key;
 }
 global $scripts;
 $scripts[]='introduction';
@@ -18,9 +20,8 @@ fw_header('Welkom');
 </ul>
 <form action="<?=$frameworkRoot?>suggest/" method="post">
 
-<input type="hidden" id="sorted" name="sorted" />
-<label>Artiesten</label><input type="text" id="artist" name="artist" /><br />
-<input type="submit" value="Verder" />
+<input type="hidden" id="sorted" name="sorted" value="<?=implode(',',$keys)?>" />
+<label>Artiesten</label><input type="text" id="artist" name="artist" /><br /><input type="submit" value="Verder" />
 </form>
 <?php
 fw_footer();
