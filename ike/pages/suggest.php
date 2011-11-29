@@ -26,6 +26,31 @@ function getRating($mbid) {
 		return null;
 	}
 }
+
+//Functie getLink geeft een lijst terug met alle links + naam.
+function getLink($mbid) {
+$r = new HttpRequest('http://musicbrainz.org/ws/2/artist/'.$mbid.'?inc=url-rels');
+	try {
+		$r->send();
+		if ($r->getResponseCode() == 200) {
+			// Ouput is een XML bestand, die wordt ingelezen dmv de SimpleXML methode.
+			$xmlResponse = simplexml_load_string($r->getResponseBody());
+			$response = $xmlResponse->children();
+			$response = $response->children();
+			$response = $response->{"relation-list"};
+			$res = array();
+			foreach ($response->relation as $relation){
+				$name = "".$relation->attributes()->type;
+				$res[$name]=$relation->target;
+			}
+			return $res;
+    }
+	} catch (HttpException $ex) {
+		return null;
+	}
+}
+
+
 try{
 // In deze eerste fase wordt er nog niets opgeslagen van een specifieke gebruiker. Vandaar is ervoor gekozen de database simpelweg elke keer leeg te gooien. Dit zal in latere versies uiteraard worden aangepast.
 $truncate = $db->prepare("TRUNCATE TABLE artistrating");
@@ -78,7 +103,16 @@ $resultArray = $q->fetchAll();
 // Nu middels een forloop het resultaat van de artiesten tonen aan de gebruiker.
 echo "<ul>";
 for ( $j = 0; $j < count($resultArray); $j++) {
-	echo "<li>".$resultArray[$j]["artistname"]."</li>";
+	echo "<li>".$resultArray[$j]["artistname"];
+	
+	$links = getLink($resultArray[$j]["id"]);
+	echo "<ul>";
+	foreach($links as $name => $target){
+		echo "<li><a href=".$target.">".$name."</a></li>";
+	}
+	echo "</ul></li>";
+	
+	
 }
 echo "</ul>";
 }catch(Exception $e){
