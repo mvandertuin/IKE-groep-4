@@ -76,8 +76,9 @@ function getArtistsByTag($tags) {
 			} catch (HttpException $ex) {
 				echo $ex;
 			}
-			return $res;
+			
 		}
+		return $res;
 	} catch (HttpException $ex) {
 		echo $ex;
 	}
@@ -97,6 +98,7 @@ function getAlbumByArtist($artist) {
 				$res=array();
 				$res["name"]=(string)$response->album->name;
 				$res["mbid"]=(string)$response->album->mbid;
+				echo $res["mbid"];
 				return $res;
 			}
 		} catch (HttpException $ex) {
@@ -106,6 +108,7 @@ function getAlbumByArtist($artist) {
 
 function getAlbumImage($album) {
 	try {
+		echo "<br>getAlbumImage:".$album;
 		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&mbid=".$album."&api_key=184af8b6220039e4cb8167a5e2bb23e3");
 		
 		$h= $r->getHeaders();
@@ -114,7 +117,8 @@ function getAlbumImage($album) {
 		$r->send();
 		if ($r->getResponseCode() == 200) {
 			$xmlResponse = simplexml_load_string($r->getResponseBody());
-			$response = $xmlResponse->children()->xpath("image");;
+			$response = $xmlResponse->children()->xpath("image");
+			var_dump($response);
 			foreach($response as $child){
 				if($child->attributes()->size == "medium"){
 					return $child;
@@ -122,6 +126,7 @@ function getAlbumImage($album) {
 			}
 			return "";
 		}
+		else{ echo "<br>fout:".$r->getResponseCode(); }
 	} catch (HttpException $ex) {
 		echo $ex;
 	}
@@ -146,23 +151,25 @@ function getArtistName($artist) {
 	}
 }
 
-function getSimilarArtists($artist) { 
+function getSimilarArtists($artists) { 
 	try {
-		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=".$artist."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
-		$h= $r->getHeaders();
-		$h['User-Agent'] = 'php44';
-		$r->setHeaders($h);
-		$r->send();
-		if ($r->getResponseCode() == 200) {
-			$xmlResponse = simplexml_load_string($r->getResponseBody());
-			$response = $xmlResponse->children();
-			$response = $response->children();
-			$res = array();
-			foreach($response as $child){
-				$res[]=$child->mbid;			
+		$res = array();
+		foreach($artists as $artist) {
+			$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=".$artist."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+			$h= $r->getHeaders();
+			$h['User-Agent'] = 'php44';
+			$r->setHeaders($h);
+			$r->send();
+			if ($r->getResponseCode() == 200) {
+				$xmlResponse = simplexml_load_string($r->getResponseBody());
+				$response = $xmlResponse->children();
+				$response = $response->children();	
+				foreach($response as $child){
+					$res[]=(string)$child->mbid;			
+				}
 			}
-			return $res;
 		}
+		return $res;
 	} catch (HttpException $ex) {
 		echo $ex;
 	}
@@ -170,10 +177,9 @@ function getSimilarArtists($artist) {
 
 function outputTags($tags) {
 	$artists = getArtistsByTag($tags);
-	foreach($artists as $a){
-		$mbid = $a;
-		$name = getArtistName($a);
-		$album = getAlbumByArtist($a);
+	foreach($artists as $mbid){
+		$name = getArtistName($mbid);
+		$album = getAlbumByArtist($mbid);
 		$image = getAlbumImage($album["mbid"]);
 	?>
 	<table border="1">
