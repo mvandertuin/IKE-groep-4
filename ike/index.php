@@ -19,7 +19,7 @@ useLib('database');
 dbStart();
 prepareModule("login");
 if($path==''){
-	$pathparts[0]='introduction';
+	$pathparts[0]='loginpage';
 }
 if($isModulePage){
 	execModule();
