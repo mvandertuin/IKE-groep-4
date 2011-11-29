@@ -27,7 +27,7 @@ function getRating($mbid) {
 	}
 }
 
-//Functie getLink geeft een lijst terug met alle links + naam.
+//Functie getLink geeft een 2dimensionale Array terug met alle links en bijbehorende namen.
 function getLink($mbid) {
 $r = new HttpRequest('http://musicbrainz.org/ws/2/artist/'.$mbid.'?inc=url-rels');
 	try {
@@ -37,10 +37,13 @@ $r = new HttpRequest('http://musicbrainz.org/ws/2/artist/'.$mbid.'?inc=url-rels'
 			$xmlResponse = simplexml_load_string($r->getResponseBody());
 			$response = $xmlResponse->children();
 			$response = $response->children();
+			// Vraag de lijst met URLs op
 			$response = $response->{"relation-list"};
+			// Maak nieuwe array aan waar het resultaat in komt te staan
 			$res = array();
+			// In foreachloop type en target opvragen en in $res zetten.
 			foreach ($response->relation as $relation){
-				$name = "".$relation->attributes()->type;
+				$name = "".$relation->attributes()->type; // Cast naar String
 				$res[$name]=$relation->target;
 			}
 			return $res;
@@ -104,7 +107,7 @@ $resultArray = $q->fetchAll();
 echo "<ul>";
 for ( $j = 0; $j < count($resultArray); $j++) {
 	echo "<li>".$resultArray[$j]["artistname"];
-	
+	//Daarnaast voor elk resultaat ook de links van de artiest tonen.
 	$links = getLink($resultArray[$j]["id"]);
 	echo "<ul>";
 	foreach($links as $name => $target){
