@@ -17,7 +17,9 @@ fw_header('Welkom');
 <?=$list?>
 </ul>
 <form action="<?=$frameworkRoot?>suggest/" method="post">
+
 <input type="hidden" id="sorted" name="sorted" />
+<label>Artiesten</label><input type="text" id="artist" name="artist" /><br />
 <input type="submit" value="Verder" />
 </form>
 <?php
