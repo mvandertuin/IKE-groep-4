@@ -43,7 +43,9 @@ $tag = array_slice($tagbrei, 0, 3);
 // In deze forloop wordt per genre een query op de musicbrainz dataset gevuurd.
 for($i = 0; $i<3; $i++) {
 	try {
-		$r = new HttpRequest('http://musicbrainz.org/ws/2/artist/?query=tag:'.$tag[$i].'&limit=20');
+		print_r($tag);
+		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=".$tag[$i]."&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+		//$r = new HttpRequest('http://musicbrainz.org/ws/2/artist/?query=tag:'.$tag[$i].'&limit=20');
 		$h= $r->getHeaders();
 		$h['User-Agent'] = 'IKE G4 0.1';
 		$r->setHeaders($h);
@@ -54,9 +56,10 @@ for($i = 0; $i<3; $i++) {
 			$response = $response->children();
 			// Voor elke artiest die hieruit volgt, wordt de rating opgehaald met de getRating functie.
 			foreach($response as $child){
-				$id=$child->attributes()->id;
+				$id=$child->mbid;
 				$name=$child->name;
-				$rat=getRating($child->attributes()->id);
+				//$rat=getRating($child->attributes()->id);
+				$rat=$child->attributes()->rank;
 				// De rating wordt vervolgens gewogen.
 				$rating=($rat+0)*(5-$i);
 				// En de artiest - rating koppel in de database opgeslagen.
