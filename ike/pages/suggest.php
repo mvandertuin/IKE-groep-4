@@ -121,9 +121,9 @@ function getAlbumImage($album) {
 					return $child;
 				}
 			}
-			return "../ike/pages/no.png";
+			return "images/no.png";
 		}
-		else{ return "../pages/no.png"; }
+		else{ return "images/no.png"; }
 	} catch (HttpException $ex) {
 		echo $ex;
 	}
@@ -179,13 +179,14 @@ function outputTags($tags) {
 		$album = getAlbumByArtist($mbid);
 		$image = getAlbumImage($album["mbid"]);
 	?>
-	<table border="1">
+	<table class="artistAlbumTable">
 		<tr>
 			<th colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
 		</tr>
 		<tr>
-			<td><img src="<?=$image ?>"></td>
+			<td class="imgtd"><img src="<?=$image ?>"></td>
 			<td>
+			<h4>Meer informatie over <?=$name?></h4>
 				<ul>
 					<?php 
 						$links = getLink($mbid);
@@ -216,13 +217,14 @@ function outputSimilar($artists) {
 			$mbid = "";
 		}
 		?>
-	<table border="1">
+		<table class="artistAlbumTable">
 		<tr>
 			<th colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
 		</tr>
 		<tr>
-			<td><img src="<?=$image ?>"></td>
+			<td class="imgtd"><img src="<?=$image ?>"></td>
 			<td>
+			<h4>Meer informatie over <?=$name?></h4>
 				<ul>
 					<?php 
 						$links = getLink($mbid);
