@@ -117,11 +117,11 @@ function getAlbumImage($album) {
 			$xmlResponse = simplexml_load_string($r->getResponseBody());
 			$response = $xmlResponse->children()->xpath("image");
 			foreach($response as $child){
-				if($child->attributes()->size == "medium"){
+				if($child->attributes()->size == "large"){
 					return $child;
 				}
 			}
-			return "images/no.png";
+			//return "images/no.png";
 		}
 		else{ return "images/no.png"; }
 	} catch (HttpException $ex) {
@@ -162,7 +162,7 @@ function getSimilarArtists($artists) {
 				$response = $xmlResponse->children();
 				$response = $response->children();	
 				foreach($response as $child){
-					$res[]= array((string)$child->mbid,(string)$child->name);			
+					$res[]= array("mbid"=>(string)$child->mbid,"name"=>(string)$child->name);			
 				}
 			}
 		}
@@ -205,10 +205,10 @@ function outputTags($tags) {
 function outputSimilar($artists) {
 		$simartists = getSimilarArtists($artists);
 		foreach($simartists as $a){
-		if($a[0] != ""){
-			$mbid = $a[0];
-			$name = $a[1];
-			$album = getAlbumByArtist($a);
+		if($a['mbid'] != ""){
+			$mbid = $a['mbid'];
+			$name = $a['name'];
+			$album = getAlbumByArtist($mbid);
 			$image = getAlbumImage($album["mbid"]);
 		}else{
 			$name = $a[1];
