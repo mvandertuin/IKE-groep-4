@@ -98,7 +98,6 @@ function getAlbumByArtist($artist) {
 				$res=array();
 				$res["name"]=(string)$response->album->name;
 				$res["mbid"]=(string)$response->album->mbid;
-				echo $res["mbid"];
 				return $res;
 			}
 		} catch (HttpException $ex) {
@@ -108,7 +107,6 @@ function getAlbumByArtist($artist) {
 
 function getAlbumImage($album) {
 	try {
-		echo "<br>getAlbumImage:".$album;
 		$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=album.getinfo&mbid=".$album."&api_key=184af8b6220039e4cb8167a5e2bb23e3");
 		
 		$h= $r->getHeaders();
@@ -118,15 +116,14 @@ function getAlbumImage($album) {
 		if ($r->getResponseCode() == 200) {
 			$xmlResponse = simplexml_load_string($r->getResponseBody());
 			$response = $xmlResponse->children()->xpath("image");
-			var_dump($response);
 			foreach($response as $child){
 				if($child->attributes()->size == "medium"){
 					return $child;
 				}
 			}
-			return "";
+			return "../ike/pages/no.png";
 		}
-		else{ echo "<br>fout:".$r->getResponseCode(); }
+		else{ return "../pages/no.png"; }
 	} catch (HttpException $ex) {
 		echo $ex;
 	}
@@ -155,7 +152,7 @@ function getSimilarArtists($artists) {
 	try {
 		$res = array();
 		foreach($artists as $artist) {
-			$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=".$artist."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+			$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=".str_replace(" ","%20",$artist)."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
 			$h= $r->getHeaders();
 			$h['User-Agent'] = 'php44';
 			$r->setHeaders($h);
@@ -165,7 +162,7 @@ function getSimilarArtists($artists) {
 				$response = $xmlResponse->children();
 				$response = $response->children();	
 				foreach($response as $child){
-					$res[]=(string)$child->mbid;			
+					$res[]= array((string)$child->mbid,(string)$child->name);			
 				}
 			}
 		}
@@ -207,10 +204,17 @@ function outputTags($tags) {
 function outputSimilar($artists) {
 		$simartists = getSimilarArtists($artists);
 		foreach($simartists as $a){
-			$mbid = $a;
-			$name = getArtistName($a);
+		if($a[0] != ""){
+			$mbid = $a[0];
+			$name = $a[1];
 			$album = getAlbumByArtist($a);
 			$image = getAlbumImage($album["mbid"]);
+		}else{
+			$name = $a[1];
+			$album["name"] = "unknown";
+			$image = "";
+			$mbid = "";
+		}
 		?>
 	<table border="1">
 		<tr>
@@ -222,8 +226,10 @@ function outputSimilar($artists) {
 				<ul>
 					<?php 
 						$links = getLink($mbid);
-						foreach($links as $name => $target){
-							echo "<li><a href=".$target.">".$name."</a></li>";
+						if(isset($links)){
+							foreach($links as $name => $target){
+								echo "<li><a href=".$target.">".$name."</a></li>";
+							}
 						}
 					?>
 				</ul>	
