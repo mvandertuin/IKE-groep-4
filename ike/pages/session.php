@@ -5,7 +5,7 @@ if(isset($pathparts[1])){
 	if($pathparts[1]=='open'){
 		if(isset($_POST['loginEmail'])&&isset($_POST['loginPass'])){
 			if(login($_POST['loginEmail'], $_POST['loginPass'])){
-				header('location: '.$frameworkRoot.'introduction/introduction.html');
+				header('location: '.$frameworkRoot.'suggest/');
 				die();
 			}else{
 				echo 'a';

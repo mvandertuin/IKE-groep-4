@@ -4,10 +4,53 @@ useLib('htmlpage');
 
 //generate page header
 fw_header('Suggesties');
+
+$query = $db->prepare("SElECT * FROM ike_voorkeur WHERE uID = ".$session['loginID']);
+$query->execute();
+if($query->rowCount()==0) { 
+	if(!$_POST['sorted']) {
+	header('location: '.$frameworkRoot.'introduction/introduction.html');
+	}
+	else {
+	// De array met tags
+	$tagbrei = explode(',',$_POST['sorted']);	
+	$tags = array_slice($tagbrei, 0, 5);
+	$query2 = $db->prepare("INSERT INTO ike_voorkeur (uID, genre1, genre2, genre3, genre4, genre5, artiesten) VALUES(:uID, :genre1, :genre2, :genre3, :genre4, :genre5,:artiesten)");
+	print $_POST['sorted'];
+	$query2-> bindParam(':uID', $session['loginID'], PDO::PARAM_INT);
+	$query2-> bindParam(':genre1', $tags[0]);
+	$query2-> bindParam(':genre2', $tags[1]);
+	$query2-> bindParam(':genre3', $tags[2]);
+	$query2-> bindParam(':genre4', $tags[3]);
+	$query2-> bindParam(':genre5', $tags[4]);
+	$query2-> bindParam(':artiesten', $_POST['artist']);
+	$query2-> execute();
+	$query2 -> errorCode();
+	$artists = $_POST['artist'];
+	
+	}
+}
+else { 
+	$results = $query->fetch(); 
+	$tags = array( $results['genre1'], $results['genre2'],$results['genre3'],$results['genre4'],$results['genre5']);
+	$artists = $results['artiesten'];
+}
 ?>
-<p>U heeft aangegeven muziekgenres leuk te vinden in de volgende volgorde: <?=$_POST['sorted']?></p>
-<p>Dit levert de volgende lijst met aanbevolen artiesten op:</p>
+
+
+
+<p>U heeft aangegeven muziekgenres leuk te vinden in de volgende volgorde: </p><p><?php echo implode(",",$tags) ?></p>
+<p>U heeft aangegeven de volgende artiesten leuk te vinden:</p>
+<p><?php echo $artists; ?></p>
 <?php
+echo "Suggesties adhv genres <br>" ;
+	outputTags($tags);
+	echo "Suggesties adhv artiesten <br>";
+	$artists = explode(",", $artists);
+	outputSimilar($artists);
+
+
+
 // Functie getRating zorgt voor het opvragen van de rating van een bepaalde artiest.
 function getRating($mbid) {
 	// De query voor het opvragen van de rating op MusicBrainz.
@@ -242,14 +285,7 @@ function outputSimilar($artists) {
 	}
 }
 
-// De array met tags
-$tagbrei = explode(',',$_POST['sorted']);	
-$tags = array_slice($tagbrei, 0, 3);
-echo "Suggesties adhv genres <br>" ;
-outputTags($tags);
-$artists = explode(",", $_POST['artist']);
-echo "Suggesties adhv artiesten <br>";
-outputSimilar($artists);
+
 
 fw_footer();
 ?>
