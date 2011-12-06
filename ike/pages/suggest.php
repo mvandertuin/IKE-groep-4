@@ -227,7 +227,10 @@ function outputTags($tags) {
 			<th colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
 		</tr>
 		<tr>
-			<td class="imgtd"><img src="<?=$image ?>"></td>
+			<td class="imgtd"><img src="<?=$image ?>">
+			<div id="<?=$mbid ?>" class="neg ratingding <?=$mbid ?>">-1</div><div id="<?=$mbid ?>"  class="pos ratingding <?=$mbid ?>">+1</div>
+			</td>
+			
 			<td>
 			<h4>Meer informatie over <?=$name?></h4>
 				<ul>
