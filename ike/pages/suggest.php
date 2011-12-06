@@ -1,5 +1,6 @@
 <?php
 useLib('htmlpage');
+
 //useLib('musicbrainz');
 
 //generate page header
@@ -8,7 +9,7 @@ fw_header('Suggesties');
 $query = $db->prepare("SElECT * FROM ike_voorkeur WHERE uID = ".$session['loginID']);
 $query->execute();
 if($query->rowCount()==0) { 
-	if(!$_POST['sorted']) {
+	if(!isset($_POST['sorted'])) {
 	header('location: '.$frameworkRoot.'introduction/introduction.html');
 	}
 	else {
@@ -25,15 +26,34 @@ if($query->rowCount()==0) {
 	$query2-> bindParam(':genre5', $tags[4]);
 	$query2-> bindParam(':artiesten', $_POST['artist']);
 	$query2-> execute();
-	$query2 -> errorCode();
 	$artists = $_POST['artist'];
 	
 	}
 }
 else { 
 	$results = $query->fetch(); 
-	$tags = array( $results['genre1'], $results['genre2'],$results['genre3'],$results['genre4'],$results['genre5']);
-	$artists = $results['artiesten'];
+	echo "test";
+	if(isset($_POST['sorted'])) {
+		echo "edit";
+		$tagbrei = explode(',',$_POST['sorted']);	
+		$tags = array_slice($tagbrei, 0, 5);
+		$query2 = $db->prepare("UPDATE ike_voorkeur SET genre1 = :genre1, genre2 = :genre2, genre3 = :genre3, genre4 = :genre4, genre5 = :genre5, artiesten = :artiesten WHERE uID = :uID");
+		$query2-> bindParam(':uID', $session['loginID'], PDO::PARAM_INT);
+		$query2-> bindParam(':genre1', $tags[0]);
+		$query2-> bindParam(':genre2', $tags[1]);
+		$query2-> bindParam(':genre3', $tags[2]);
+		$query2-> bindParam(':genre4', $tags[3]);
+		$query2-> bindParam(':genre5', $tags[4]);
+		$query2-> bindParam(':artiesten', $_POST['artist']);
+		$query2-> execute();
+		$query2-> errorCode();
+		$artists = $_POST['artist'];
+	}
+	
+	else {	
+		$tags = array( $results['genre1'], $results['genre2'],$results['genre3'],$results['genre4'],$results['genre5']);
+		$artists = $results['artiesten'];
+	}
 }
 ?>
 
@@ -42,7 +62,9 @@ else {
 <p>U heeft aangegeven muziekgenres leuk te vinden in de volgende volgorde: </p><p><?php echo implode(",",$tags) ?></p>
 <p>U heeft aangegeven de volgende artiesten leuk te vinden:</p>
 <p><?php echo $artists; ?></p>
-<?php
+<p><a href="introduction/">Bewerk voorkeuren</a></p>
+
+<?
 echo "Suggesties adhv genres <br>" ;
 	outputTags($tags);
 	echo "Suggesties adhv artiesten <br>";
