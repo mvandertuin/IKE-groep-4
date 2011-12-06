@@ -16,3 +16,26 @@ body{
 #sortlist { list-style: none; padding: 0; margin: 0 40px; } 
 #sortlist li { margin: 0 0 1px 0; background: #CFF; padding: 2px; } 
 #sortlist .handle { float: left; margin-right: 10px; cursor: move; } 
+
+.artistAlbumTable{
+	width:94%;
+	margin-left:auto;
+	margin-right:auto;
+	border:medium hidden;
+}
+
+.artistAlbumTable th{
+	background-color:#DDD;
+}
+.artistAlbumTable .imgtd{
+	width:185px;
+}
+.artistAlbumTable img{
+	width:174px;
+	height:174px;
+	margin:3px;
+}
+.artistAlbumTable ul{
+	list-style-type:none;
+	list-style-image:url(a.png);
+}
