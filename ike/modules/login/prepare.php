@@ -18,7 +18,7 @@ $q->bindColumn('sessID', $sessid);
 $q->bindColumn('valid', $valid);
 $q->bindColumn('storage', $storage);
 if($q->fetch()){
-	$q->close();
+	//$q->close();
 	if(time()<$valid){
 		$session['loginID'] = $uid;
 		$session['storage'] = $storage;
@@ -26,11 +26,11 @@ if($q->fetch()){
 		$q3->bindParam(':userid', $uid);
 		$q3->execute();
 		$q3->bindColumn('naam',$naam);
-		$q3->bindCOlumn('type',$type);
+		$q3->bindColumn('type',$type);
 		$q3->fetch();
 		$session['userName']=$naam;
 		$session['userType']=$type;
-		$q3->close();
+		//$q3->close();
 		$q2 = $db->prepare("UPDATE ".$db_tableprefix."session SET valid = :valid WHERE sessID = :session LIMIT 1");
 		$valtime = time()+900;
 		if($q2===false){
@@ -47,7 +47,7 @@ if($q->fetch()){
 	}
 	
 	$q2->execute();
-	$q2->close();
+	//$q2->close();
 }
 
 $session['sid'] = session_id();
@@ -75,24 +75,29 @@ function login($email, $pass){
 	echo 'b';
 	if(hashPassword($uid, $pass)==$codewachtwoord){
 		echo 'c';
-		$q2 = $db->prepare("INSERT INTO ".$db_tableprefix."session (bcpuID, sessID, valid, storage) VALUES (:uid, :session, :valid, :storage");
+		$q2 = $db->prepare("INSERT INTO ".$db_tableprefix."session (iuID, sessID, valid, storage) VALUES (:uid, :session, :valid, :storage)");
 		$sid = $session['sid'];
 		$valtime = time()+900;
-		$storage = '';
-		if($q2===false){
-			echo mysqli_error($db);
+		$storage = 'hoi';
+		if(!$q2){
+			print_r($db->errorInfo());
 		}
-		$q2->bindParam(':uid', $uid);
+		$q2->bindParam(':uid', $uid, PDO::PARAM_INT);
 		$q2->bindParam(':session', $sid);
-		$q2->bindParam(':valid', $valtime);
+		$q2->bindParam(':valid', $valtime, PDO::PARAM_INT);
 		$q2->bindParam(':storage', $storage);
+		print($q2->queryString);
 		//$q2->bind_param('isis', $uid, $sid, $valtime, $storage);
 		$q2->execute();
-		//$q2->close();
-		$session['loginID']=$uid;
-		$session['userType']=$type;
-		$session['userName']=$naam;
-		return true;
+		print $q2->errorCode();
+		print $q2->errorInfo();
+			//$q2->close();
+			
+			$session['loginID']=$uid;
+			$session['userType']=$type;
+			$session['userName']=$naam;
+			return true;
+		print_r($db->errorInfo());
 	}
 	return false;
 }
