@@ -24,6 +24,33 @@ body{
 	border:medium hidden;
 }
 
+
+.ratingding{
+	width:20px;
+	height:20px;
+	margin-left:10px;
+	text-align:center;
+	color:white;
+}
+
+.neg{
+	background-color:#F78181;
+	float:left;
+}
+
+.neg:hover{
+	background-color:#FA5858;
+}
+
+.pos{
+	background-color:#D8F781;
+	float:left;
+}
+
+.pos:hover{
+	background-color:#C8FE2E
+}
+
 .artistAlbumTable th{
 	background-color:#DDD;
 }
