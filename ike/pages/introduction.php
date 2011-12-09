@@ -15,7 +15,7 @@ useLib('htmlpage');
 fw_header('Welkom');
 ?>
 <h2>Geef uw muziekvookeur op</h2>
-<p>Sleep de genres hieronder in de volgorde waarin u deze graag luisterd. Plaats uw favoriete genre bovenaan en de minst favoriete van onder.</p>
+<p>Sleep de genres hieronder in de volgorde waarin u deze graag luistert. Plaats uw favoriete genre bovenaan en de minst favoriete van onder.</p>
 <ul id="sortlist">
 <?=$list?>
 </ul>
