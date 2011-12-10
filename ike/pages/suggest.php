@@ -2,7 +2,7 @@
 useLib('htmlpage');
 
 //useLib('musicbrainz');
-
+global $db;
 //generate page header
 fw_header('Suggesties');
 
@@ -32,7 +32,6 @@ if($query->rowCount()==0) {
 }
 else { 
 	$results = $query->fetch(); 
-	echo "test";
 	if(isset($_POST['sorted'])) {
 		echo "edit";
 		$tagbrei = explode(',',$_POST['sorted']);	
@@ -55,6 +54,7 @@ else {
 		$artists = $results['artiesten'];
 	}
 }
+	$votedon = getVotedOn($db, $session['loginID']);
 ?>
 
 
@@ -66,7 +66,7 @@ else {
 
 <?
 echo "Suggesties adhv genres <br>" ;
-	outputTags($tags);
+	outputTags($tags, $votedon);
 	echo "Suggesties adhv artiesten <br>";
 	$artists = explode(",", $artists);
 	outputSimilar($artists);
@@ -92,6 +92,28 @@ function getRating($mbid) {
 	}
 }
 
+function getRatingByMbid($array, $mbid){
+	if(!empty($array)){
+		foreach($array as $row){
+			if($row[0] == $mbid){
+				return $row[1];
+			}
+		}
+	}
+	return 0;
+}
+
+function getVotedOn($db, $uid){
+		$q1 = $db->prepare("SELECT album_id, rating FROM user_album_rating WHERE user_id = :uid");
+		$q1->bindParam(':uid', $uid);
+		
+		if($q1->execute()){
+			$ret = $q1->fetchAll();
+			return $ret;
+		}else{
+			print_r($q->errorInfo());
+		}
+}
 //Functie getLink geeft een 2dimensionale Array terug met alle links en bijbehorende namen.
 function getLink($mbid) {
 $r = new HttpRequest('http://wwww.chl43.nl:3000/ws/2/artist/'.$mbid.'?inc=url-rels');
@@ -237,20 +259,23 @@ function getSimilarArtists($artists) {
 	}
 }
 
-function outputTags($tags) {
+function outputTags($tags, $voted_on) {
 	$artists = getArtistsByTag($tags);
+
 	foreach($artists as $mbid){
 		$name = getArtistName($mbid);
 		$album = getAlbumByArtist($mbid);
 		$image = getAlbumImage($album["mbid"]);
+		$rat = getRatingByMbid($voted_on, $mbid)
+		
 	?>
 	<table class="artistAlbumTable">
 		<tr>
-			<th colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
+			<th id="<?=$mbid ?>" class="top" colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
 		</tr>
-		<tr>
+		<tr id="<?=$mbid."row" ?>" <?php if($rat == -1) print('style="display:none ; "'); ?>>
 			<td class="imgtd"><img src="<?=$image ?>">
-			<div id="<?=$mbid ?>" class="neg ratingding <?=$mbid ?>">-1</div><div id="<?=$mbid ?>"  class="pos ratingding <?=$mbid ?>">+1</div>
+			<div id="<?=$mbid ?>" class="neg ratingding <?=$mbid ?> <?php if($rat == -1) print("votedon"); ?>">-1</div><div id="<?=$mbid ?>"  class="pos ratingding <?=$mbid ?> <?php if($rat == 1) print("votedon"); ?>">+1</div>
 			</td>
 			
 			<td>
@@ -272,6 +297,7 @@ function outputTags($tags) {
 
 function outputSimilar($artists) {
 		$simartists = getSimilarArtists($artists);
+		$i = 0;
 		foreach($simartists as $a){
 		if($a['mbid'] != ""){
 			$mbid = $a['mbid'];
@@ -282,7 +308,7 @@ function outputSimilar($artists) {
 			$name = $a[1];
 			$album["name"] = "unknown";
 			$image = "";
-			$mbid = "";
+			$mbid = $i;
 		}
 		?>
 		<table class="artistAlbumTable">
@@ -307,6 +333,7 @@ function outputSimilar($artists) {
 		</tr>
 	</table>
 	<?php
+	$i++;
 	}
 }
 

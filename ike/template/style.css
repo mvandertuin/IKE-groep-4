@@ -51,6 +51,14 @@ body{
 	background-color:#C8FE2E
 }
 
+.votedon{
+	border: 1px solid black;
+}
+
+.top:hover{
+	background-color:#BDBDBD;
+}
+
 .artistAlbumTable th{
 	background-color:#DDD;
 }
