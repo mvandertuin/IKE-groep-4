@@ -171,6 +171,33 @@ function getArtistsByTag($tags) {
 	}
 }
 
+function getTrackByArtist($artist) {
+	try {
+			$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.gettoptracks&mbid=".$artist."&limit=1&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+			$h= $r->getHeaders();
+			$h['User-Agent'] = 'IKE G4 0.1';
+			$r->setHeaders($h);
+			$r->send();
+			if ($r->getResponseCode() == 200) {
+				$xmlResponse = simplexml_load_string($r->getResponseBody());
+				$response = $xmlResponse->children();
+				$response = $response->children();
+				$res=array();
+				$res["name"]=(string)$response->track->name;
+				$res["mbid"]=(string)$response->track->mbid;
+				foreach($response->track->image as $child){
+					if($child->attributes()->size == "large"){
+						$res["image"] = $child;
+					}
+				}
+				if(!isset($res["image"])) { $res["image"]="images/no.png"; }
+				return $res;
+			}
+		} catch (HttpException $ex) {
+		echo $ex;
+	}
+}
+
 function getAlbumByArtist($artist) {
 	try {
 			$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=artist.gettopalbums&mbid=".$artist."&limit=1&api_key=184af8b6220039e4cb8167a5e2bb23e3");
@@ -264,14 +291,16 @@ function outputTags($tags, $voted_on) {
 
 	foreach($artists as $mbid){
 		$name = getArtistName($mbid);
-		$album = getAlbumByArtist($mbid);
-		$image = getAlbumImage($album["mbid"]);
+		//$album = getAlbumByArtist($mbid);
+		//$image = getAlbumImage($album["mbid"]);
+		$track = getTrackByArtist($mbid);
+		$image = $track["image"];
 		$rat = getRatingByMbid($voted_on, $mbid)
 		
 	?>
 	<table class="artistAlbumTable">
 		<tr>
-			<th id="<?=$mbid ?>" class="top" colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
+			<th id="<?=$mbid ?>" class="top" colspan="2"><?php echo $name ?> - <?php echo $track["name"] ?></th>
 		</tr>
 		<tr id="<?=$mbid."row" ?>" <?php if($rat == -1) print('style="display:none ; "'); ?>>
 			<td class="imgtd"><img src="<?=$image ?>">
@@ -302,8 +331,8 @@ function outputSimilar($artists) {
 		if($a['mbid'] != ""){
 			$mbid = $a['mbid'];
 			$name = $a['name'];
-			$album = getAlbumByArtist($mbid);
-			$image = getAlbumImage($album["mbid"]);
+			$track = getTrackByArtist($mbid);
+			$image = $track["image"];
 		}else{
 			$name = $a[1];
 			$album["name"] = "unknown";
@@ -313,7 +342,7 @@ function outputSimilar($artists) {
 		?>
 		<table class="artistAlbumTable">
 		<tr>
-			<th colspan="2"><?php echo $name ?> - <?php echo $album["name"] ?></th>
+			<th colspan="2"><?php echo $name ?> - <?php echo $track["name"] ?></th>
 		</tr>
 		<tr>
 			<td class="imgtd"><img src="<?=$image ?>"></td>
