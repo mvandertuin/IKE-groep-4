@@ -6,23 +6,25 @@ useLib('database');
 dbStart();
 include('framework/genretree.php');
 include('framework/sparqllib.php');
-$root = new GenreNode(0, 'root', null);
+$root = new GenreNode(0, 'root', 'root');
+print_r($root);
 $nodes = array();
 $nodes[] = $root;
-$nodes = array_merge($nodes, $root->getChildren());
-foreach($root->getChildren() as $new){
-	$nodes[$new->getID()] = $new;
+//$nodes = array_merge($nodes, $root->getChildren());
+print_r($root->getEdges());
+foreach($root->getEdges() as $new){
+	$nodes[$new->other($root)->getID()] = $new->other($root);
 }
 for($i = 0; $i<count($nodes); $i++){
 	$node = $nodes[$i];
 	echo $node->getID().'>'.$node->getName()."\r\n";
-	foreach($node->getChildren() as $child){
-		if($child->getID()>$node->getID()){
-			GenreNode::build($child);
-			foreach($child->getChildren() as $new){
-				$nodes[$new->getID()] = $new;
+	foreach($node->getEdges() as $child){
+		//if($child->other($node)->getID() > $node->getID()){
+			GenreNode::build($child>other($node));
+			foreach($child->other($node)->getEdges() as $new){
+				$nodes[$new->other($child)->getID()] = $new>-other($child);
 			}
-		}
+		//}
 	}
 }
 

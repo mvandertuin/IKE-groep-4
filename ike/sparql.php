@@ -1,11 +1,11 @@
 <?
 require_once( "sparqllib.php" );
  
-$db = sparql_connect( "http://dbtune.org/musicbrainz/sparql" );
+$db = sparql_connect( "http://dbpedia.org/sparql" );
 if( !$db ) { print $db->errno() . ": " . $db->error(). "\n"; exit; }
 //$db->ns( "foaf","http://xmlns.com/foaf/0.1/" );
  
-$sparql = "SELECT * WHERE { ?a ?b ?c} LIMIT 5";
+$sparql = "SELECT * WHERE {?x dbpedia-owl:musicSubgenre ?y} LIMIT 5";
 $result = $db->query( $sparql ); 
 if( !$result ) { print $db->errno() . ": " . $db->error(). "\n"; exit; }
  
