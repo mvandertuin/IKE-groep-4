@@ -1,10 +1,45 @@
 <?php
 useLib('htmlpage');
+?>
+<html>
+<head>
+	<title>dragdrop test</title>
+
+<base href="<?=$frameworkRoot?>"></base>
+<script type="text/javascript" src="javascript/jquery-1.7.js"></script>
+<script type="text/javascript" src="javascript/jquery-ui-1.8.16.custom.js"></script>
+<script type="text/javascript" src="javascript/jquery.ui.core.js"></script>
+<script type="text/javascript" src="javascript/jquery.ui.sortable.js"></script>
+<script type="text/javascript" src="javascript/jquery.tools.min.js"></script>
+<script type="text/javascript" src="javascript/ratingscript.js"></script>
+<script type="text/javascript" src="javascript/dragdrop.js"></script>
+
+<link rel="stylesheet" href="template/newstyle.css" />
+<?php
+global $scripts;
+foreach($scripts as $script){
+	?>
+	<script type="text/javascript" src="javascript/<?=$script?>.js"></script>
+	<?php	
+}
+?>
+</head>
+<body>
+<div class="header">SongRecommend<a class="pref" href="introduction/">Bewerk voorkeuren</a></div>
+<div class="wrapper" id="wrapper">
+	<div class="deletebox" id="del">
+	<p class="valign" >delete</p>
+	</div>
+
+
+
+
+<?php
 
 //useLib('musicbrainz');
 global $db;
 //generate page header
-fw_header('Suggesties');
+//fw_header('Suggesties');
 
 $query = $db->prepare("SElECT * FROM ike_voorkeur WHERE uID = ".$session['loginID']);
 $query->execute();
@@ -55,21 +90,10 @@ else {
 	}
 }
 	$votedon = getVotedOn($db, $session['loginID']);
-?>
 
-
-
-<p>U heeft aangegeven muziekgenres leuk te vinden in de volgende volgorde: </p><p><?php echo implode(",",$tags) ?></p>
-<p>U heeft aangegeven de volgende artiesten leuk te vinden:</p>
-<p><?php echo $artists; ?></p>
-<p><a href="introduction/">Bewerk voorkeuren</a></p>
-
-<?
-echo "Suggesties adhv genres <br>" ;
 	outputTags($tags, $votedon);
-	echo "Suggesties adhv artiesten <br>";
 	$artists = explode(",", $artists);
-	outputSimilar($artists);
+	//outputSimilar($artists);
 
 
 
@@ -298,18 +322,17 @@ function outputTags($tags, $voted_on) {
 		$rat = getRatingByMbid($voted_on, $mbid)
 		
 	?>
-	<table class="artistAlbumTable">
-		<tr>
-			<th id="<?=$mbid."top" ?>" class="top" colspan="2"><?php echo $name ?> - <?php echo $track["name"] ?></th>
-		</tr>
-		<tr id="<?=$mbid."!row" ?>" <?php if($rat == -1) print('style="display:none ; "'); ?>>
-			<td class="imgtd"><img src="<?=$image ?>">
-			<div id="<?=$mbid."-1" ?>" class="neg ratingding <?=$mbid ?> <?php if($rat == -1) print("votedon"); ?>">-1</div>
-			<div id="<?=$mbid."+1" ?>"  class="pos ratingding <?=$mbid ?> <?php if($rat == 1) print("votedon"); ?>">+1</div>
-			</td>
-			
-			<td>
-			<h4>Meer informatie over <?=$name?></h4>
+	<div id="<?=$mbid ?>" class="contentbox">
+		<div class="titlebox"><?=$track["name"] ?></div>
+		<img src="<?=$image ?>" />
+		<div class="titlebox"><?=$name ?></div>
+		<div id="<?=$mbid ?>_-1" class="neg ratingbutton <?=$mbid ?>">-1</div><div id="<?=$mbid ?>_+1" class="pos ratingbutton <?=$mbid ?>">+1</div><div id="info" rel="#<?=$mbid ?>_overl" class="info ratingbutton">i</div>
+	</div>	
+	
+	<div class="simple_overlay" id="<?=$mbid ?>_overl">
+		<div class="overlay_title"><?=$name ?> - <?=$track["name"] ?></div>
+		<img src="<?=$image ?>" />
+		<div class="details">
 				<ul>
 					<?php 
 						$links = getLink($mbid);
@@ -318,56 +341,24 @@ function outputTags($tags, $voted_on) {
 						}
 					?>
 				</ul>	
-			</td>
-		</tr>
-	</table>
+		</div>
+	</div>
+
+	
+	
+	
+	
+	
+	
+	
+
 	<?php
 	}
 }
-
-function outputSimilar($artists) {
-		$simartists = getSimilarArtists($artists);
-		$i = 0;
-		foreach($simartists as $a){
-		if($a['mbid'] != ""){
-			$mbid = $a['mbid'];
-			$name = $a['name'];
-			$track = getTrackByArtist($mbid);
-			$image = $track["image"];
-		}else{
-			$name = $a[1];
-			$album["name"] = "unknown";
-			$image = "";
-			$mbid = $i;
-		}
-		?>
-		<table class="artistAlbumTable">
-		<tr>
-			<th colspan="2"><?php echo $name ?> - <?php echo $track["name"] ?></th>
-		</tr>
-		<tr>
-			<td class="imgtd"><img src="<?=$image ?>"></td>
-			<td>
-			<h4>Meer informatie over <?=$name?></h4>
-				<ul>
-					<?php 
-						$links = getLink($mbid);
-						if(isset($links)){
-							foreach($links as $name => $target){
-								echo "<li><a href=".$target.">".$name."</a></li>";
-							}
-						}
-					?>
-				</ul>	
-			</td>
-		</tr>
-	</table>
-	<?php
-	$i++;
-	}
-}
-
-
-
-fw_footer();
 ?>
+	<div class="simple_overlay" id="alertbox">
+		bla
+	</div>
+</div>
+</body>
+</html>
