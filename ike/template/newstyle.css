@@ -1,0 +1,172 @@
+@font-face {
+  font-family: 'Vegur';
+  src: url('Vegur.otf');
+}
+
+@font-face {
+  font-family: 'VegurBold';
+  src: url('VegurBold.otf');
+}
+
+body{
+	font-family: 'Vegur', 'Arial', sans-serif;
+}
+
+.header{
+	width:100%;
+	font-size:20pt;
+	color:#FFFFFF;
+	background-color:#CCCCE0;
+}
+
+.wrapper{
+	width:100%;
+	height:100%;
+}
+
+.deletebox{
+	float:left;
+	background-color:#F3F3F3;
+	height:100%;
+	width:10%;
+	font-size:20pt;
+}
+
+.valign{
+	margin-top:40%;
+	width:100%;
+	text-align:center;
+	color:#CCCCE0;
+	font-family: 'VegurBold', 'Arial', sans-serif;
+}
+
+.votedon{
+	border: 1px solid black;
+}
+
+.contentbox{
+	float:left;
+	margin-left:20px;
+	margin-top:20px;
+	background-color:#EEE;
+	padding:0px;
+	width:120px;;
+}
+
+.contentbox img{
+	width:120px;
+	height:120px;
+	float:left;
+}
+
+.titlebox{
+	margin:0px;
+	text-align:center;
+	width:100%;
+	float:left;
+	font-family: 'VegurBold', 'Arial', sans-serif;
+	overflow:hidden;
+	height:18px;
+}
+
+.ratingbutton{
+	width:20px;
+	height:20px;
+	margin-left:5px;
+	margin-top:5px;
+	margin-bottom:5px;
+	text-align:center;
+	color:white;
+	font-family: 'VegurBold', 'Arial', sans-serif;
+}
+
+.info{
+	background-color:#CCCCE0;
+	float:left;
+}
+
+.neg{
+	background-color:#F78181;
+	float:left;
+}
+
+.neg:hover{
+	background-color:#FA5858;
+}
+
+.pos{
+	background-color:#D8F781;
+	float:left;
+}
+
+.pos:hover{
+	background-color:#C8FE2E
+}
+
+.votedon{
+	border: 1px solid black;
+}
+
+.top:hover{
+	background-color:#BDBDBD;
+}
+
+.pref{
+	float:right;
+}
+
+a.pref{
+	color:white;
+}
+
+
+/*overlay */
+.simple_overlay {
+	
+	/* must be initially hidden */
+	display:none;
+	
+	/* place overlay on top of other elements */
+	z-index:10000;
+	
+	/* styling */
+	background-color:#FFFFFF;
+	width:675px;	
+	min-height:200px;
+	border:1px solid #666;
+}
+
+/* close button positioned on upper right corner */
+.simple_overlay .close {
+	background-image:url(../images/close.png);
+	position:absolute;
+	right:-15px;
+	top:-15px;
+	cursor:pointer;
+	height:35px;
+	width:35px;
+}
+
+.simple_overlay  img {
+	float:left;
+	margin-left:20px;
+}
+
+#alertbox.simple_overlay {
+	width:150px;	
+	min-height:40px;
+	text-align:center;
+	padding-top:10px;
+}
+
+.overlay_title{
+	width:100%;
+	text-align:center;
+	font-family: 'VegurBold', 'Arial', sans-serif;
+	font-size:15pt;
+}
+
+.details {
+	float:left;
+	margin-left:20px;
+}
