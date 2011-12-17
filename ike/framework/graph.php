@@ -7,6 +7,10 @@ class Node{
 	private $connections = array();
 	private $modified = false;
 	private $id = -1;
+	
+	/**
+	 * Create a new Node object
+	 */
 	function __construct($id, $name = '', $displayName = '', $value = 100){
 			$this->id = $id;
 			$this->name = $name;
@@ -14,19 +18,31 @@ class Node{
 			$this->value = $value;
 	}
 	
+	/*
+	 * Add a connection to another node to this node
+	 */
 	function addConnection(Edge $e){
 		$this->connections[] = $e;
 	}
 	
+	/*
+	 * Returns the value of this node
+	 */
 	function getValue(){
 		return $this->value;
 	}
 	
+	/*
+	 * Changes the value of this node. If this value isn't specified, it will be reset to the default
+	 */
 	function changeValue($newValue = 100){
 		$this->value = $newValue;
 		$this->modified = true;
 	}
 	
+	/*
+	 * Returns the name of the node. By default the displayname is returned.
+	 */
 	function getName($displayName = true){
 		if($displayName){
 			return $this->displayName;
@@ -35,22 +51,38 @@ class Node{
 		}		
 	}
 	
+	/*
+	 * Returns the ID of this node
+	 */
 	function getID(){
 		return $this->id;
 	}
 	
+	/*
+	 * Changes the displayname of this node. The internal name cannot be modified
+	 */
 	function changeName($newName){
 		$this->displayName = $newName;
 		$this->modified = true;
 	}
 	
+	/*
+	 * Returns true if this node is connected to other nodes
+	 */
 	function hasConnections(){
 		return count($this->connections)!=0;
 	}
 	
+	/*
+	 * Returns an array of connections to other nodes (or an empty array)
+	 */
 	function getConnections(){
 		return $this->connections;
 	}
+	
+	/*
+	 * Returns true if a similar Node can be found in the database
+	 */
 	static function exists($name){
 		$q = "SELECT nodeID FROM ike_graph WHERE nodeName = :name";
 		global $db;
@@ -68,6 +100,9 @@ class Node{
 		}
 	}
 	
+	/*
+	 * Creates a nwe node, saves its data in the database and returns the new node as a Node object
+	 */
 	static function create($name, $displayName, $value){
 		global $db;
 		if(!isset($db)){
@@ -241,6 +276,27 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
 			}
 		}
 		return $changes;
+	}
+	/**
+	 * Experimental function to export a graph to a dot file (GraphViz file)
+	**/
+	function export($destination){
+		$lines = array();
+		$lines[] = "Graph G{";
+		foreach($this->nodes as $node){
+			$lines[] = 'n'.$node->getID().' [label="'.$node->getName().'"];';
+		}
+		foreach($this->edges as $edge){
+			$ns = $edge->getNodes();
+			$lines[] = 'n'.$ns[0]->getID().' -- n'.$ns[1]->getID().';';	
+		}
+		$lines[] = 'splines=true;';
+		$lines[] = '}';
+		$fileHandle = fopen($destination, 'w');
+		foreach($lines as $line){
+			fwrite($fileHandle, $line."\n");
+		}
+		fclose($fileHandle);
 	}
 }
 
