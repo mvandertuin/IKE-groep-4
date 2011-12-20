@@ -101,6 +101,26 @@ class Node{
 	}
 	
 	/*
+	 * Returns true if a similar Node can be found in the database, but less strict than exists
+	 */
+	static function find($name){
+		$q = "SELECT nodeID FROM ike_graph WHERE nodeName LIKE :name";
+		global $db;
+		if(!isset($db)){
+			throw new Exception('Database connection required!', -1);
+		}
+		$qa = $db->prepare($q);
+		$qa->bindParam(':name', $name);
+		$qa->bindColumn('nodeID', $id);
+		$qa->execute();
+		if($qa->fetch()){
+			return $id;
+		}else{
+			return false;
+		}
+	}
+	
+	/*
 	 * Creates a nwe node, saves its data in the database and returns the new node as a Node object
 	 */
 	static function create($name, $displayName, $value){
@@ -306,4 +326,44 @@ function filter_uri($uri){
 }
 function uri_prep($tag){
 	return '<http://dbpedia.org/resource/'.str_replace(' ', '_', $tag).'>';
+}
+class UserGraph extends Graph{
+	function __construct($userID){
+		parent::__construct();
+		global $db;
+		if(!isset($db)){
+			throw new Exception('Database connection required!', -1);
+		}
+		$n1 = min($left->getID(), $right->getID());
+		$n2 = max($left->getID(), $right->getID());
+		$q = "SELECT nodeID, rating, album_id FROM user_album_rating JOIN ike_mbid_node ON album_id = mbid WHERE user_id = :uid ORDER BY album_id";
+		$mq = $db->prepare();
+		$mq->bindParam(':uid', $userID);
+		$mq->bindColumn('nodeID', $nodeID);
+		$mq->bindColumn('rating', $rating);
+		$mq->bindColumn('album_id', $albumID);
+		$mq->execute();
+		$prevAlbum = '';
+		while($mq->fetch()){
+			//Apply userrating to a node and its edges
+			if($rating>0){
+				$changeNode = 1.1;
+				$changeEdge = 0.9;
+			}else{
+				$changeNode = 0.9;
+				$changeEdge = 1.1;
+			}
+			$node = $this->nodes[$nodeID];
+			$edges = $node->getConnections();
+			$node->changeValue($node->getValue()*$changeNode);
+			foreach($edges as $edge){
+				$edge->changeWeight($edge->getWeight()*$changeEdge);
+			}
+		}
+		
+		
+		
+	}
+	
+	
 }
