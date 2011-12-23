@@ -165,6 +165,7 @@ class Edge{
 	private $weight = 1;
 	private $modified = false;
 	private $id = -1;
+	
 	function __construct($id, Node $left, Node $right, $weight){
 		$this->left = $left;
 		$this->right = $right;
@@ -241,6 +242,9 @@ class Edge{
 class Graph{
 	protected $nodes = array();
 	protected $edges = array();
+	/**
+	 * Build a basic graph containing only information form the graph and edges database tables
+	 */
 	function __construct(){
 		global $db;
 		if(!isset($db)){
@@ -284,6 +288,9 @@ class Graph{
 		return $this->edges;
 	}
 	
+	/**
+	 * Check for all the nodes in the graph if there are 'connected'/related genres on DBPedia and add them to the graph
+	 */
 	function build($printStatus = false){
 		$changes = 0;
 		$sparql = sparql_connect( "http://dbpedia.org/sparql");
@@ -356,6 +363,8 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
 	}
 }
 
+
+//Specific functions to take specific information from a DBPedia-URI and to reconstruct a DBPedia-URI
 function filter_uri($uri){
 	$p1 = str_replace('http://dbpedia.org/resource/', '', $uri);
 	return str_replace('_', ' ', $p1);
@@ -368,11 +377,13 @@ class UserGraph extends Graph{
 	 * Constructs a personalized graph
 	 */
 	function __construct($userID){
+		//Build basic graph
 		parent::__construct();
 		global $db;
 		if(!isset($db)){
 			throw new Exception('Database connection required!', -1);
 		}
+		//Get all votes of this user with relations to nodes in the graph from the database
 		$q = "SELECT nodeID, rating, album_id FROM user_album_rating JOIN ike_mbid_node ON album_id = mbid WHERE user_id = :uid ORDER BY album_id";
 		$mq = $db->prepare($q);
 		$mq->bindParam(':uid', $userID);
@@ -386,6 +397,8 @@ class UserGraph extends Graph{
 		while($mq->fetch()){
 			//Apply userrating to a node and its edges
 			if($albumID != $prevAlbum){
+				//A list of nodes with changes applied by the same vote is created
+				// Check if there are edges between these nodes, if no add them to the graph (in memory, not db)
 				$prevAlbum = $albumID;
 				if($changeEdge<1){
 					for($i = 0; $i<count($list)-1; $i++){
@@ -410,6 +423,7 @@ class UserGraph extends Graph{
 				$changeNode = 0.9;
 				$changeEdge = 1.1;
 			}
+			//Apply changes to the score of the nodes and the 'penalty'weight of the edges
 			$node = $this->nodes[$nodeID];
 			$edges = $node->getConnections();
 			$node->changeValue($node->getValue()*$changeNode);
@@ -459,6 +473,9 @@ class UserGraph extends Graph{
 		}
 		return $max;
 	}
+	/**
+	 * Returns 10 nodes with highest ratings in a MST built from the node with the hijghest user-rating
+	 */
 	function getHigestRatedNodes(){
 		$result = array();
 		$best = $this->getHigestRatedNode();
@@ -468,31 +485,36 @@ class UserGraph extends Graph{
 		}
 		return $result;
 	}
+	
+	/**
+	 * returns the node with the best rating attached to $from
+	 */
 	private function findNextHighest($from){
 		$connectedNodes = array();
 		foreach($from as $node){
 			$edges = $node[1]->getConnections();
 			foreach($edges as $edge){
-				//echo $edge->toString();
 				$connectedNode = $edge->otherNode($node[1]);
-				//$connectedNode->toString();
-				//$connectedNode->changeValue($connectedNode->getValue()-$edge->getWeight());//Distance penalty
 				$connectedNodes[] = array($connectedNode->getValue()-$edge->getWeight(), $connectedNode);
 			}
 		}
 		usort($connectedNodes, create_function('$a,$b','return $b[0] - $a[0];'));
 		$i = 0;
-		while(isInList($from, $connectedNodes[$i][1])){
+		while(UserGraph::isInList($from, $connectedNodes[$i][1])){
 			$i++;
 		}
 		return $connectedNodes[$i];
 	}
-}
-function isInList($list, $element){
-	foreach($list as $e){
-		if($e[1]->getID()==$element->getID()){
-			return true;
+	
+	/**
+	 * Specific function wich searches in a returnlist for a certain node
+	 */
+	private static function isInList($list, $element){
+		foreach($list as $e){
+			if($e[1]->getID()==$element->getID()){
+				return true;
+			}
 		}
+		return false;
 	}
-	return false;
 }
