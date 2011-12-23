@@ -80,6 +80,26 @@ class Node{
 		return $this->connections;
 	}
 	
+	function isModified(){
+		return $this->modified;
+	}
+	
+	function toString(){
+		$r='[Node'.$this->id.'{name: \''.$this->getName().'\', edges: (';
+		$f = true;
+		foreach($this->getConnections() as $c){
+			if($f){
+				$f= false;
+			}else{
+				$r.=',';
+			}
+			$r.= $c->getID();
+		}
+		$r.=')}]';
+		return $r;
+		
+	}
+	
 	/*
 	 * Returns true if a similar Node can be found in the database
 	 */
@@ -163,6 +183,22 @@ class Edge{
 	}
 	function getID(){
 		return $this->id;
+	}
+	function isModified(){
+		return $this->modified;
+	}
+	function otherNode(Node $c){
+		//echo $this->toString();
+		if($this->left->getID()==$c->getID()){
+			//echo 'r';
+			return $this->right;
+		}else{
+			//echo 'l';
+			return $this->left;
+		}
+	}
+	function toString(){
+		return '[Edge'.$this->id.'{left: \''.$this->left->getName().'('.$this->left->getID().')\', right: \''.$this->right->getName().'('.$this->right->getID().')\'}]';
 	}
 	static function create(Node $left, Node $right, $weight){
 		global $db;
@@ -398,6 +434,17 @@ class UserGraph extends Graph{
 		return false;
 	}	
 	
+	private function getEdge($from, $to){
+		$pos = $this->nodes[$from->getID()]->getConnections();
+		foreach($pos as $edge){
+			$nodes = $edge->getNodes();
+			if($nodes[0]==$to||$nodes[1]==$to){
+				return $edge;
+			}
+		}
+		return null;		
+	}
+	
 	/**
 	 * Returns the node with the highest user-rating
 	 */
@@ -412,4 +459,40 @@ class UserGraph extends Graph{
 		}
 		return $max;
 	}
+	function getHigestRatedNodes(){
+		$result = array();
+		$best = $this->getHigestRatedNode();
+		$result[] = array($best->getValue(), $best);
+		for($i=1;$i<10;$i++){
+			$result[] = $this->findNextHighest($result);
+		}
+		return $result;
+	}
+	private function findNextHighest($from){
+		$connectedNodes = array();
+		foreach($from as $node){
+			$edges = $node[1]->getConnections();
+			foreach($edges as $edge){
+				//echo $edge->toString();
+				$connectedNode = $edge->otherNode($node[1]);
+				//$connectedNode->toString();
+				//$connectedNode->changeValue($connectedNode->getValue()-$edge->getWeight());//Distance penalty
+				$connectedNodes[] = array($connectedNode->getValue()-$edge->getWeight(), $connectedNode);
+			}
+		}
+		usort($connectedNodes, create_function('$a,$b','return $a[0] - $b[0];'));
+		$i = 0;
+		while(isInList($from, $connectedNodes[$i][1])){
+			$i++;
+		}
+		return $connectedNodes[$i];
+	}
+}
+function isInList($list, $element){
+	foreach($list as $e){
+		if($e[1]->getID()==$element->getID()){
+			return true;
+		}
+	}
+	return false;
 }
