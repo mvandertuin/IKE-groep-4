@@ -97,7 +97,7 @@ if($session['loginID'] > 0){
 					$qa->bindColumn('cID', $id);
 					$qa->execute();
 					if(!$qa->fetch()){
-						$q = "INSERT INTO  `musicdat`.`ike_mbid_node` (`cID` ,`mbID` ,`nodeID`)VALUES (NULL ,  :mbid,  :NodeId);";
+						$q = "INSERT INTO `ike_mbid_node` (`cID` ,`mbID` ,`nodeID`)VALUES (NULL ,  :mbid,  :NodeId);";
 						$insq = $db->prepare($q);
 						$insq->bindParam(':mbid', $_POST["mbid"]);
 						$insq->bindParam(':NodeId', $nodeId);
