@@ -208,7 +208,7 @@ function getTrackByArtist($artist) {
 				$response = $response->children();
 				$res=array();
 				$res["name"]=(string)$response->track->name;
-				$res["mbid"]=(string)$response->track->mbid;
+				$res["mbid"]=(string)$response->track->id;
 				foreach($response->track->image as $child){
 					if($child->attributes()->size == "large"){
 						$res["image"] = $child;
@@ -234,6 +234,7 @@ function getAlbumByArtist($artist) {
 				$response = $xmlResponse->children();
 				$response = $response->children();
 				$res=array();
+				
 				$res["name"]=(string)$response->album->name;
 				$res["mbid"]=(string)$response->album->mbid;
 				return $res;
@@ -319,14 +320,17 @@ function outputTags($tags, $voted_on) {
 		//$image = getAlbumImage($album["mbid"]);
 		$track = getTrackByArtist($mbid);
 		$image = $track["image"];
-		$rat = getRatingByMbid($voted_on, $mbid)
-		
+		$rat = getRatingByMbid($voted_on, $mbid);
+		$mbid2 = $mbid;
+		if($track["mbid"] != ""){
+			$mbid=$track["mbid"];
+		}
 	?>
 	<div id="<?=$mbid ?>" class="contentbox">
 		<div class="titlebox"><?=$track["name"] ?></div>
 		<img src="<?=$image ?>" />
 		<div class="titlebox"><?=$name ?></div>
-		<div id="<?=$mbid ?>_-1" class="neg ratingbutton <?=$mbid ?>">-1</div><div id="<?=$mbid ?>_+1" class="pos ratingbutton <?=$mbid ?>">+1</div><div id="info" rel="#<?=$mbid ?>_overl" class="info ratingbutton">i</div>
+		<div id="<?=$mbid ?>_-1" class="neg ratingbutton <?=$mbid ?><?php if($rat==-1) echo " votedon"; ?>">-1</div><div id="<?=$mbid ?>_1" class="pos ratingbutton <?=$mbid ?><?php if($rat==1) echo " votedon"; ?>">+1</div><div id="info" rel="#<?=$mbid ?>_overl" class="info ratingbutton">i</div>
 	</div>	
 	
 	<div class="simple_overlay" id="<?=$mbid ?>_overl">
@@ -335,7 +339,7 @@ function outputTags($tags, $voted_on) {
 		<div class="details">
 				<ul>
 					<?php 
-						$links = getLink($mbid);
+						$links = getLink($mbid2);
 						foreach($links as $name => $target){
 							echo "<li><a href=".$target.">".$name."</a></li>";
 						}
@@ -359,6 +363,7 @@ function outputTags($tags, $voted_on) {
 	<div class="simple_overlay" id="alertbox">
 		bla
 	</div>
+	<div class="more">Add Recommendations</div>
 </div>
 </body>
 </html>
