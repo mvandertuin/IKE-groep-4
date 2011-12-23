@@ -390,12 +390,12 @@ class UserGraph extends Graph{
 				if($changeEdge<1){
 					for($i = 0; $i<count($list)-1; $i++){
 						for($j = $i+1; $j<count($list); $j++){
-							if(!$this->hasEdge($nodes[$list[$i]], $nodes[$list[$j]])){
+							if(!$this->hasEdge($this->nodes[$list[$i]], $this->nodes[$list[$j]])){
 								$nid = max(array_keys($this->edges))+1;
-								$e = new Edge($nid, $nodes[$list[$i]], $nodes[$list[$j]], 100*$changeEdge);
+								$e = new Edge($nid, $this->nodes[$list[$i]], $this->nodes[$list[$j]], 100*$changeEdge);
 								$this->edges[$nid] = $e;
-								$nodes[$list[$i]]->addConnection($e);
-								$nodes[$list[$j]]->addConnection($e);
+								$this->nodes[$list[$i]]->addConnection($e);
+								$this->nodes[$list[$j]]->addConnection($e);
 							}					
 						}
 					}
@@ -480,7 +480,7 @@ class UserGraph extends Graph{
 				$connectedNodes[] = array($connectedNode->getValue()-$edge->getWeight(), $connectedNode);
 			}
 		}
-		usort($connectedNodes, create_function('$a,$b','return $a[0] - $b[0];'));
+		usort($connectedNodes, create_function('$a,$b','return $b[0] - $a[0];'));
 		$i = 0;
 		while(isInList($from, $connectedNodes[$i][1])){
 			$i++;
