@@ -104,7 +104,7 @@ class Node{
 	 * Returns true if a similar Node can be found in the database, but less strict than exists
 	 */
 	static function find($name){
-		$q = "SELECT nodeID FROM ike_graph WHERE nodeName LIKE :name";
+		$q = "SELECT nodeID FROM ike_graph WHERE displayName LIKE :name";
 		global $db;
 		if(!isset($db)){
 			throw new Exception('Database connection required!', -1);
@@ -203,8 +203,8 @@ class Edge{
 }
 
 class Graph{
-	private $nodes = array();
-	private $edges = array();
+	protected $nodes = array();
+	protected $edges = array();
 	function __construct(){
 		global $db;
 		if(!isset($db)){
@@ -328,24 +328,45 @@ function uri_prep($tag){
 	return '<http://dbpedia.org/resource/'.str_replace(' ', '_', $tag).'>';
 }
 class UserGraph extends Graph{
+	/**
+	 * Constructs a personalized graph
+	 */
 	function __construct($userID){
 		parent::__construct();
 		global $db;
 		if(!isset($db)){
 			throw new Exception('Database connection required!', -1);
 		}
-		$n1 = min($left->getID(), $right->getID());
-		$n2 = max($left->getID(), $right->getID());
 		$q = "SELECT nodeID, rating, album_id FROM user_album_rating JOIN ike_mbid_node ON album_id = mbid WHERE user_id = :uid ORDER BY album_id";
-		$mq = $db->prepare();
+		$mq = $db->prepare($q);
 		$mq->bindParam(':uid', $userID);
 		$mq->bindColumn('nodeID', $nodeID);
 		$mq->bindColumn('rating', $rating);
 		$mq->bindColumn('album_id', $albumID);
 		$mq->execute();
 		$prevAlbum = '';
+		$changeEdge = 10;//dummy, will be replaced but wont trigger adding a new edge
+		$list = array();
 		while($mq->fetch()){
 			//Apply userrating to a node and its edges
+			if($albumID != $prevAlbum){
+				$prevAlbum = $albumID;
+				if($changeEdge<1){
+					for($i = 0; $i<count($list)-1; $i++){
+						for($j = $i+1; $j<count($list); $j++){
+							if(!$this->hasEdge($nodes[$list[$i]], $nodes[$list[$j]])){
+								$nid = max(array_keys($this->edges))+1;
+								$e = new Edge($nid, $nodes[$list[$i]], $nodes[$list[$j]], 100*$changeEdge);
+								$this->edges[$nid] = $e;
+								$nodes[$list[$i]]->addConnection($e);
+								$nodes[$list[$j]]->addConnection($e);
+							}					
+						}
+					}
+				}
+				$list = array();
+			}
+			$list[] = $nodeID;
 			if($rating>0){
 				$changeNode = 1.1;
 				$changeEdge = 0.9;
@@ -359,11 +380,36 @@ class UserGraph extends Graph{
 			foreach($edges as $edge){
 				$edge->changeWeight($edge->getWeight()*$changeEdge);
 			}
+			
 		}
-		
-		
-		
 	}
 	
+	/**
+	 * Checks if a connection is in this graph (not in the database!)
+	 */
+	function hasEdge($from, $to){
+		$pos = $this->nodes[$from->getID()]->getConnections();
+		foreach($pos as $edge){
+			$nodes = $edge->getNodes();
+			if($nodes[0]==$to||$nodes[1]==$to){
+				return true;
+			}
+		}
+		return false;
+	}	
 	
+	/**
+	 * Returns the node with the highest user-rating
+	 */
+	function getHigestRatedNode(){
+		$w = 0;
+		$max = null;
+		foreach($this->nodes as $node){
+			if($node->getValue()>$w){
+				$max = $node;
+				$w = $max->getValue();
+			}
+		}
+		return $max;
+	}
 }
