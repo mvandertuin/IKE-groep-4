@@ -9,10 +9,36 @@ global $db_tableprefix;
 
 //Include helper functions for generating an HTML page
 useLib('htmlpage');
+useLib('graph');
 
 //generate page header
 //fw_header('Inloggen');
 
+function getTags($mbid){
+	try {
+		$r = new HttpRequest("http://www.chl43.nl:3000/ws/2/artist/".$mbid."?inc=tags");
+		$h= $r->getHeaders();
+		$h['User-Agent'] = 'IKE G4 0.1';
+		$r->setHeaders($h);
+		$r->send();
+		if ($r->getResponseCode() == 200) {
+			$xmlResponse = simplexml_load_string($r->getResponseBody());
+			$ret = array();
+			$i = 0;
+			foreach($xmlResponse->artist->{"tag-list"}->children() as $tag){
+				$ret[$i] = $tag->name;
+				$i++;
+			};
+			return $ret;
+		}
+		else {
+			print($r->getResponseCode());
+			return null;
+		}
+	} catch (HttpException $ex) {
+		echo $ex;
+	}
+}
 
 
 //Check for login
@@ -23,9 +49,9 @@ if($session['loginID'] > 0){
 		$q1 = $db->prepare("SELECT * FROM user_album_rating WHERE user_id = :uid AND album_id = :aid;");
 		$q1->bindParam(':uid', $session['loginID']);
 		$q1->bindParam(':aid', $_POST["mbid"]);
-		
 		if($q1->execute()){
-			if($q1->fetch() != false){
+			$arr = $q1->fetchAll();
+			if(count($arr)>0){
 				$q = $db->prepare("UPDATE user_album_rating SET rating = :rat WHERE user_id = :uid AND album_id = :aid LIMIT 1 ;");
 				//Insert rating
 				$q->bindParam(':uid', $session['loginID']);
@@ -54,6 +80,36 @@ if($session['loginID'] > 0){
 					print("SQL ERROR: <br />");
 					print $q->errorCode();
 					print_r($q->errorInfo());
+				}
+			}
+			
+			$tags = getTags($_POST["mbid"]);
+			foreach($tags as $unit){
+				$nodeId = Node::find($unit);
+				if($nodeId != false){
+					$q = "SELECT cID FROM ike_mbid_node WHERE nodeID = :name AND mbID = :mbid";
+					if(!isset($db)){
+						throw new Exception('Database connection required!', -1);
+					}
+					$qa = $db->prepare($q);
+					$qa->bindParam(':name', $nodeId);
+					$qa->bindParam(':mbid', $_POST["mbid"]);
+					$qa->bindColumn('cID', $id);
+					$qa->execute();
+					if(!$qa->fetch()){
+						$q = "INSERT INTO  `musicdat`.`ike_mbid_node` (`cID` ,`mbID` ,`nodeID`)VALUES (NULL ,  :mbid,  :NodeId);";
+						$insq = $db->prepare($q);
+						$insq->bindParam(':mbid', $_POST["mbid"]);
+						$insq->bindParam(':NodeId', $nodeId);
+						
+						if($insq->execute()){
+							print("");
+						}else{
+								print("SQL ERROR: <br />");
+								print $insq->errorCode();
+								print_r($insq->errorInfo());
+						}
+					}
 				}
 			}
 		}
