@@ -462,7 +462,7 @@ class UserGraph extends Graph{
 	/**
 	 * Returns the node with the highest user-rating
 	 */
-	function getHigestRatedNode(){
+	function getHighestRatedNode(){
 		$w = 0;
 		$max = null;
 		foreach($this->nodes as $node){
@@ -476,9 +476,9 @@ class UserGraph extends Graph{
 	/**
 	 * Returns 10 nodes with highest ratings in a MST built from the node with the hijghest user-rating
 	 */
-	function getHigestRatedNodes(){
+	function getHighestRatedNodes(){
 		$result = array();
-		$best = $this->getHigestRatedNode();
+		$best = $this->getHighestRatedNode();
 		$result[] = array($best->getValue(), $best);
 		for($i=1;$i<10;$i++){
 			$result[] = $this->findNextHighest($result);
@@ -489,7 +489,7 @@ class UserGraph extends Graph{
 	/**
 	 * returns the node with the best rating attached to $from
 	 */
-	private function findNextHighest($from){
+	public function findNextHighest($from, $alg = 3){
 		$connectedNodes = array();
 		foreach($from as $node){
 			$edges = $node[1]->getConnections();
