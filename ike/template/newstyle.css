@@ -134,6 +134,20 @@ a.pref{
 		background-color:#F3F3F3;
 		color:#CCCCE0;
 }
+
+
+.keuze{
+		text-align:center;
+    font-size:20pt;
+		color:#FFFFFF;
+		background-color:#CCCCE0;
+		margin:10px;
+}
+
+.keuze:hover{
+		background-color:#F3F3F3;
+		color:#CCCCE0;
+}
 /*overlay */
 .simple_overlay {
 	
@@ -148,6 +162,7 @@ a.pref{
 	width:675px;	
 	min-height:200px;
 	border:1px solid #666;
+	padding:10px;
 }
 
 /* close button positioned on upper right corner */
