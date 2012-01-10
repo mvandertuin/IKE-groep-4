@@ -383,6 +383,18 @@ class UserGraph extends Graph{
 		if(!isset($db)){
 			throw new Exception('Database connection required!', -1);
 		}
+		//Get initial votes on genres of this user
+		$q = "SELCT nodeID, score FROM ike_genrescore WHERE userID = :uid";
+		$mq = $db->prepare($q);
+		$mq->bindParam(':uid', $userID);
+		$mq->bindColumn('nodeID', $nodeID);
+		$mq->bindColumn('score', $score);
+		$mq->execute();
+		$changes = array(1=>0.8, 2=>0.9, 3=>1, 4=>1.1, 5=>1.2);
+		while($mq->fetch()){
+			$node = $this->nodes[$nodeID];
+			$node->changeWeight($node->getWeight()*$changes[$score]);
+		}
 		//Get all votes of this user with relations to nodes in the graph from the database
 		$q = "SELECT nodeID, rating, album_id FROM user_album_rating JOIN ike_mbid_node ON album_id = mbid WHERE user_id = :uid ORDER BY album_id";
 		$mq = $db->prepare($q);
@@ -476,11 +488,11 @@ class UserGraph extends Graph{
 	/**
 	 * Returns 10 nodes with highest ratings in a MST built from the node with the hijghest user-rating
 	 */
-	function getHighestRatedNodes(){
+	function getHighestRatedNodes($amount = 10){
 		$result = array();
 		$best = $this->getHighestRatedNode();
 		$result[] = array($best->getValue(), $best);
-		for($i=1;$i<10;$i++){
+		for($i=1;$i<$amount;$i++){
 			$result[] = $this->findNextHighest($result);
 		}
 		return $result;
@@ -490,20 +502,78 @@ class UserGraph extends Graph{
 	 * returns the node with the best rating attached to $from
 	 */
 	public function findNextHighest($from, $alg = 3){
-		$connectedNodes = array();
-		foreach($from as $node){
-			$edges = $node[1]->getConnections();
-			foreach($edges as $edge){
-				$connectedNode = $edge->otherNode($node[1]);
-				$connectedNodes[] = array($connectedNode->getValue()-$edge->getWeight(), $connectedNode);
+		$proposals = array();
+		
+		//MST
+		if($alg&1==1){
+			foreach($from as $node){
+				$edges = $node[1]->getConnections();
+				foreach($edges as $edge){
+					$connectedNode = $edge->otherNode($node[1]);
+					$proposals[] = array($connectedNode->getValue()-$edge->getWeight(), $connectedNode);
+				}
 			}
 		}
-		usort($connectedNodes, create_function('$a,$b','return $b[0] - $a[0];'));
+		
+		//Highest global
+		if($alg&2==2){
+				foreach($this->nodes as $node){
+					$proposals[] = array($node->getValue(), $node);				
+				}
+		}	
+		
+		usort($proposals, create_function('$a,$b','return $b[0] - $a[0];'));
 		$i = 0;
-		while(UserGraph::isInList($from, $connectedNodes[$i][1])){
+		while(UserGraph::isInList($from, $proposals[$i][1])){
 			$i++;
 		}
-		return $connectedNodes[$i];
+		return $proposals[$i];
+	}
+	
+	/**
+	 * Returns the node with the highest user-rating
+	 */
+	function getLowestRatedNode(){
+		$w = 100000000000;
+		$max = null;
+		foreach($this->nodes as $node){
+			if($node->getValue()<$w){
+				$max = $node;
+				$w = $max->getValue();
+			}
+		}
+		return $max;
+	}
+	/**
+	 * Returns 10 nodes with highest ratings in a MST built from the node with the hijghest user-rating
+	 */
+	function getLowestRatedNodes($amount = 10){
+		$result = array();
+		foreach($this->nodes as $node){
+			$result[] =  array($node->getValue(), $node);		
+		}
+		usort($result, create_function('$a,$b','return $b[0] + $a[0];'));
+		return array_slice($result, 0, $amount);
+	}
+	
+	/**
+	 * returns the node with the best rating attached to $from
+	 */
+	public function findNextLowest($from){
+		$proposals = array();		
+		//Highest global
+		if($alg&2==2){
+				foreach($this->nodes as $node){
+					$proposals[] = array($node->getValue(), $node);				
+				}
+		}	
+		
+		usort($proposals, create_function('$a,$b','return $b[0] + $a[0];'));
+		$i = 0;
+		while(UserGraph::isInList($from, $proposals[$i][1])){
+			$i++;
+		}
+		return $proposals[$i];
 	}
 	
 	/**
