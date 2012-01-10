@@ -552,7 +552,7 @@ class UserGraph extends Graph{
 		foreach($this->nodes as $node){
 			$result[] =  array($node->getValue(), $node);		
 		}
-		usort($result, create_function('$a,$b','return $b[0] + $a[0];'));
+		usort($result, create_function('$a,$b','return $a[0] - $b[0];'));
 		return array_slice($result, 0, $amount);
 	}
 	
@@ -568,7 +568,7 @@ class UserGraph extends Graph{
 				}
 		}	
 		
-		usort($proposals, create_function('$a,$b','return $b[0] + $a[0];'));
+		usort($proposals, create_function('$a,$b','return $a[0] - $b[0];'));
 		$i = 0;
 		while(UserGraph::isInList($from, $proposals[$i][1])){
 			$i++;
