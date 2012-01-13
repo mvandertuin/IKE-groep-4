@@ -3,106 +3,17 @@
 useLib('htmlpage');
 useLib('graph');
 //global $session;
-?>
-<html>
-<head>
-	<title>SongRecommend</title>
-
-<base href="<?=$frameworkRoot?>"></base>
-<script type="text/javascript" src="javascript/jquery-1.7.js"></script>
-<script type="text/javascript" src="javascript/jquery-ui-1.8.16.custom.js"></script>
-<script type="text/javascript" src="javascript/jquery.ui.core.js"></script>
-<script type="text/javascript" src="javascript/jquery.ui.sortable.js"></script>
-<script type="text/javascript" src="javascript/jquery.tools.min.js"></script>
-<script type="text/javascript" src="javascript/ratingscript.js"></script>
-<script type="text/javascript" src="javascript/dragdrop.js"></script>
-
-<link rel="stylesheet" href="template/newstyle.css" />
-<?php
-global $scripts;
-foreach($scripts as $script){
-	?>
-	<script type="text/javascript" src="javascript/<?=$script?>.js"></script>
-	<?php	
-}
-?>
-</head>
-<body>
-<div class="header">SongRecommend<a class="pref" href="introduction/">Bewerk voorkeuren</a></div>
-<div class="wrapper" id="wrapper">
-
-	<div class="deletebox" id="del">
-	
-	<p class="valign" >delete</p>
-	</div>
-<div class="wrapper2">
-
-
-
-<?php
 
 //useLib('musicbrainz');
 global $db;
 global $servername;
+global $session;
 $servername = "http://wwww.chl43.nl:3000";
 //generate page header
 //fw_header('Suggesties');
-$query = $db->prepare("SElECT * FROM ike_voorkeur WHERE uID = ".$session['loginID']);
-
-$query->execute();
-if($query->rowCount()==0) { 
-	if(!isset($_POST['sorted'])) {
-	header('location: '.$frameworkRoot.'introduction/introduction.html');
-	}
-	else {
-	// De array met tags
-	$tagbrei = explode(',',$_POST['sorted']);	
-	$tags = array_slice($tagbrei, 0, 5);
-	$query2 = $db->prepare("INSERT INTO ike_voorkeur (uID, genre1, genre2, genre3, genre4, genre5, artiesten) VALUES(:uID, :genre1, :genre2, :genre3, :genre4, :genre5,:artiesten)");
-	print $_POST['sorted'];
-	$query2-> bindParam(':uID', $session['loginID'], PDO::PARAM_INT);
-	$query2-> bindParam(':genre1', $tags[0]);
-	$query2-> bindParam(':genre2', $tags[1]);
-	$query2-> bindParam(':genre3', $tags[2]);
-	$query2-> bindParam(':genre4', $tags[3]);
-	$query2-> bindParam(':genre5', $tags[4]);
-	$query2-> bindParam(':artiesten', $_POST['artist']);
-	$query2-> execute();
-	$artists = $_POST['artist'];
-	
-	}
-}
-else { 
-	$results = $query->fetch(); 
-	if(isset($_POST['sorted'])) {
-		echo "edit";
-		$tagbrei = explode(',',$_POST['sorted']);	
-		$tags = array_slice($tagbrei, 0, 5);
-		$query2 = $db->prepare("UPDATE ike_voorkeur SET genre1 = :genre1, genre2 = :genre2, genre3 = :genre3, genre4 = :genre4, genre5 = :genre5, artiesten = :artiesten WHERE uID = :uID");
-		$query2-> bindParam(':uID', $session['loginID'], PDO::PARAM_INT);
-		$query2-> bindParam(':genre1', $tags[0]);
-		$query2-> bindParam(':genre2', $tags[1]);
-		$query2-> bindParam(':genre3', $tags[2]);
-		$query2-> bindParam(':genre4', $tags[3]);
-		$query2-> bindParam(':genre5', $tags[4]);
-		$query2-> bindParam(':artiesten', $_POST['artist']);
-		$query2-> execute();
-		$query2-> errorCode();
-		$artists = $_POST['artist'];
-	}
-	
-	else {	
-		$tags = array( $results['genre1'], $results['genre2'],$results['genre3'],$results['genre4'],$results['genre5']);
-		$artists = $results['artiesten'];
-	}
-}
-	$votedon = getVotedOn($db, $session['loginID']);
-
-	outputTags($tags, $votedon, $session['loginID']);
-	$artists = explode(",", $artists);
-	//outputSimilar($artists);
-
-
+$votedon = getVotedOn($db, $session['loginID']);
+$new = isset($_POST['newtrack']);
+outputTags($session['loginID'], $votedon, $new);
 
 // Functie getRating zorgt voor het opvragen van de rating van een bepaalde artiest.
 function getRating($mbid) {
@@ -180,7 +91,7 @@ function getArtistsByTag($tags, $max) {
 		$res=array();
 		for($i = 0; $i<$max; $i++) {
 			try {
-				$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=".str_replace(" ","%20",$tags[$i])."&limit=2&api_key=184af8b6220039e4cb8167a5e2bb23e3");
+				$r = new HttpRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag=".str_replace(" ","%20",$tags[$i])."&limit=10&api_key=184af8b6220039e4cb8167a5e2bb23e3");
 				$h= $r->getHeaders();
 				$h['User-Agent'] = 'IKE G4 0.1';
 				$r->setHeaders($h);
@@ -191,7 +102,10 @@ function getArtistsByTag($tags, $max) {
 					$response = $response->children();		
 					foreach($response as $child){
 						if($child->mbid != ""){
-							$res[]=$child->mbid;
+							if(!isShown($child->mbid)){
+								$res[]=$child->mbid;
+								return $res;
+							}
 						}
 					}
 				}
@@ -205,6 +119,7 @@ function getArtistsByTag($tags, $max) {
 		echo $ex;
 	}
 }
+
 
 function getTrackByArtist($artist) {
 	try {
@@ -277,6 +192,21 @@ function getAlbumImage($album) {
 	} catch (HttpException $ex) {
 		echo $ex;
 	}
+}
+function isShown($mbid){
+		global $session;
+		global $db;
+		
+		$q1 = $db->prepare("SELECT * FROM ike_shown WHERE user_id = :uid AND mbid = :aid;");
+		$q1->bindParam(':uid', $session['loginID']);
+		$q1->bindParam(':aid', $mbid);
+		if($q1->execute()){
+			$arr = $q1->fetchAll();
+			if(count($arr)<1){
+				return false;
+			}
+			return true;
+		}
 }
 
 function addShown($mbid){
@@ -366,20 +296,25 @@ function getAllVotedArtists($id){
 	return array();
 }
 
-function outputTags($tags, $voted_on, $id) {
-	$artists1 = getArtistsByTag($tags, 3);
+function outputTags($id, $voted_on, $n) {
 	$graph = new UserGraph($id);
-	$node_array = $graph->getHighestRatedNodes();
-	$tagarr = array();
-	$i = 0;
-	foreach($node_array as $recom){
-		$tagarr[$i] = $recom[1]->getName();
-		$i++;
+	if($n){
+		$node_array = $graph->getHighestRatedNodes(30);
+	}else{
+		$node_array = $graph->getHighestRatedNodes();
 	}
-	$artists2 = getArtistsByTag($tagarr, count($tagarr));
-	$artists = array_merge($artists1, $artists2);
-	$artists = array_merge($artists, getAllVotedArtists($id));
-	$artists = array_unique($artists);
+	$tagarr = array();
+	foreach($node_array as $recom){
+		$tagarr[] = $recom[1]->getName();
+	}
+	$random = array();
+	if($n){
+		$random[] = $tagarr[rand(10,29)];
+	}else{
+		$random[] = $tagarr[array_rand($tagarr,1)];
+	}
+
+	$artists = getArtistsByTag($random, count($random));
 	foreach($artists as $mbid){
 		$name = getArtistName($mbid);
 		//$album = getAlbumByArtist($mbid);
@@ -427,11 +362,4 @@ function outputTags($tags, $voted_on, $id) {
 	}
 }
 ?>
-	</div>
-	<div class="simple_overlay" id="alertbox">
-		bla
-	</div>
-	<div class="more">Add Recommendations</div>
-</div>
-</body>
-</html>
+
