@@ -23,4 +23,4 @@
 .ui-slider-vertical .ui-slider-range-min { bottom: 0; }
 .ui-slider-vertical .ui-slider-range-max { top: 0; }
 
-.question > div {width: 200px; margin-left: 50px; margin-top:10px; }
+.question > div { margin-left: 20px; margin-top: 4px; margin-bottom: 4px; width:200px; }

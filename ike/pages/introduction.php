@@ -53,124 +53,135 @@ else {
 <p>Stel voor elk genre de slider in. De slider helemaal naar links geeft aan dat het genre niet leuk is, naar rechts geeft het aan dat je het genre geweldig vind.</p>
 <form action="<?=$frameworkRoot?>voorkeurenverwerker/" method="post">
 
+<table>
+<tr><td>Blues</td><td>
 <div class= "question">
-Blues: <input type="radio" name="blues" value="1" <?php echo $checked['blues'][1]; ?>>
+<input type="radio" name="blues" value="1" <?php echo $checked['blues'][1]; ?>>
 <input type="radio" name="blues" value="2" <?php echo $checked['blues'][2]; ?>>
 <input type="radio" name="blues" value="3" <?php echo $checked['blues'][3]; ?>>
 <input type="radio" name="blues" value="4" <?php echo $checked['blues'][4]; ?>>
-<input type="radio" name="blues" value="5" <?php echo $checked['blues'][5]; ?>> </div> 
-</div>
-<div class="question">Classical:
+<input type="radio" name="blues" value="5" <?php echo $checked['blues'][5]; ?>> </div>
+</td></tr>
+
+<tr><td>Classical:</td>
+<td>
+<div class="question">
 <input type="radio" name="classical" value="1" <?php echo $checked['classical'][1]; ?>>
 <input type="radio" name="classical" value="2" <?php echo $checked['classical'][2]; ?>>
 <input type="radio" name="classical" value="3" <?php echo $checked['classical'][3]; ?>>
 <input type="radio" name="classical" value="4" <?php echo $checked['classical'][4]; ?>>
-<input type="radio" name="classical" value="5" <?php echo $checked['classical'][5]; ?>> </div> 
-</div>
+<input type="radio" name="classical" value="5" <?php echo $checked['classical'][5]; ?>> </div>
+</td></tr>
 
-<div class="question">Country:
+<tr><td>Country:</td><td>
+<div class="question">
 <input type="radio" name="country" value="1" <?php echo $checked['country'][1]; ?>>
 <input type="radio" name="country" value="2" <?php echo $checked['country'][2]; ?>>
 <input type="radio" name="country" value="3" <?php echo $checked['country'][3]; ?>>
 <input type="radio" name="country" value="4" <?php echo $checked['country'][4]; ?>>
 <input type="radio" name="country" value="5" <?php echo $checked['country'][5]; ?>> </div> 
+</td></tr>
 
-
-<div class="question">Dance:
+<tr><td>Dance:</td><td>
+<div class="question">
 <input type="radio" name="dance" value="1" <?php echo $checked['dance'][1]; ?>>
 <input type="radio" name="dance" value="2" <?php echo $checked['dance'][2]; ?>>
 <input type="radio" name="dance" value="3" <?php echo $checked['dance'][3]; ?>>
 <input type="radio" name="dance" value="4" <?php echo $checked['dance'][4]; ?>>
 <input type="radio" name="dance" value="5" <?php echo $checked['dance'][5]; ?>> </div> 
-
-
-<div class="question">Electronic:
+</td></tr>
+<tr><td>Electronic:</td><td>
+<div class="question">
 <input type="radio" name="electronic" value="1" <?php echo $checked['electronic'][1]; ?>>
 <input type="radio" name="electronic" value="2" <?php echo $checked['electronic'][2]; ?>>
 <input type="radio" name="electronic" value="3" <?php echo $checked['electronic'][3]; ?>>
 <input type="radio" name="electronic" value="4" <?php echo $checked['electronic'][4]; ?>>
 <input type="radio" name="electronic" value="5" <?php echo $checked['electronic'][5]; ?>> </div> 
+</td></tr>
 
-
-<div class="question">Hip-Hop:
+<tr><td>Hip-Hop</td><td>
+<div class="question">
 <input type="radio" name="hiphop" value="1" <?php echo $checked['hiphop'][1]; ?>>
 <input type="radio" name="hiphop" value="2" <?php echo $checked['hiphop'][2]; ?>>
 <input type="radio" name="hiphop" value="3" <?php echo $checked['hiphop'][3]; ?>>
 <input type="radio" name="hiphop" value="4" <?php echo $checked['hiphop'][4]; ?>>
 <input type="radio" name="hiphop" value="5" <?php echo $checked['hiphop'][5]; ?>> </div> 
+</td></tr>
 
-
-
-<div class="question">House:
+<tr><td>House</td><td>
+<div class="question">
 <input type="radio" name="house" value="1" <?php echo $checked['house'][1]; ?>>
 <input type="radio" name="house" value="2"  <?php echo $checked['house'][2]; ?>>
 <input type="radio" name="house" value="3" <?php echo $checked['house'][3]; ?>>
 <input type="radio" name="house" value="4" <?php echo $checked['house'][4]; ?>>
 <input type="radio" name="house" value="5" <?php echo $checked['house'][5]; ?>> </div> 
+</td></tr>
 
-
-<div class="question">Jazz:
+<tr><td>Jazz:</td><td>
+<div class="question">
 <input type="radio" name="jazz" value="1"  <?php echo $checked['jazz'][1]; ?>>
 <input type="radio" name="jazz" value="2" <?php echo $checked['jazz'][2]; ?>>
 <input type="radio" name="jazz" value="3" <?php echo $checked['jazz'][3]; ?>>
 <input type="radio" name="jazz" value="4" <?php echo $checked['jazz'][4]; ?>>
-<input type="radio" name="jazz" value="5" <?php echo $checked['jazz'][5]; ?>> </div> 
+<input type="radio" name="jazz" value="5" <?php echo $checked['jazz'][5]; ?>> </div> </td></tr>
 
-
-<div class="question">Pop:
+<tr><td>Pop</td><td>
+<div class="question">
 <input type="radio" name="pop" value="1" <?php echo $checked['pop'][1]; ?>>
 <input type="radio" name="pop" value="2" <?php echo $checked['pop'][2]; ?>>
 <input type="radio" name="pop" value="3" <?php echo $checked['pop'][3]; ?>>
 <input type="radio" name="pop" value="4" <?php echo $checked['pop'][4]; ?>>
-<input type="radio" name="pop" value="5" <?php echo $checked['pop'][5]; ?>> </div> 
+<input type="radio" name="pop" value="5" <?php echo $checked['pop'][5]; ?>> </div> </td></tr>
 
-
-<div class="question">Punk:
+<tr><td>Punk</td><td>
+<div class="question">
 <input type="radio" name="punk" value="1" <?php echo $checked['punk'][1]; ?>>
 <input type="radio" name="punk" value="2" <?php echo $checked['punk'][2]; ?>>
 <input type="radio" name="punk" value="3" <?php echo $checked['punk'][3]; ?>>
 <input type="radio" name="punk" value="4" <?php echo $checked['punk'][4]; ?>>
-<input type="radio" name="punk" value="5" <?php echo $checked['punk'][5]; ?>> </div> 
+<input type="radio" name="punk" value="5" <?php echo $checked['punk'][5]; ?>> </div> </td></tr>
 
-
-<div class="question">Reggae:
+<tr><td>Reggae</td><td>
+<div class="question">
 <input type="radio" name="reggae" value="1" <?php echo $checked['reggae'][1]; ?>>
 <input type="radio" name="reggae" value="2" <?php echo $checked['reggae'][2]; ?>>
 <input type="radio" name="reggae" value="3" <?php echo $checked['reggae'][3]; ?>>
 <input type="radio" name="reggae" value="4" <?php echo $checked['reggae'][4]; ?>>
 <input type="radio" name="reggae" value="5" <?php echo $checked['reggae'][5]; ?>> </div> 
-
-
-<div class="question">Rock:
+</td></tr>
+<tr><td>Rock</td><td>
+<div class="question">
 <input type="radio" name="rock" value="1" <?php echo $checked['rock'][1]; ?>>
 <input type="radio" name="rock" value="2" <?php echo $checked['rock'][2]; ?>>
 <input type="radio" name="rock" value="3" <?php echo $checked['rock'][3]; ?>>
 <input type="radio" name="rock" value="4" <?php echo $checked['rock'][4]; ?>>
-<input type="radio" name="rock" value="5" <?php echo $checked['rock'][5]; ?>> </div> 
+<input type="radio" name="rock" value="5" <?php echo $checked['rock'][5]; ?>> </div> </td></tr>
 
-
-<div class="question">Soul:
+<tr><td>Soul</td><td>
+<div class="question">
 <input type="radio" name="soul" value="1"  <?php echo $checked['soul'][1]; ?>>
 <input type="radio" name="soul" value="2" <?php echo $checked['soul'][2]; ?>>
 <input type="radio" name="soul" value="3"  <?php echo $checked['soul'][3]; ?>>
 <input type="radio" name="soul" value="4" <?php echo $checked['soul'][4]; ?>>
-<input type="radio" name="soul" value="5" <?php echo $checked['soul'][5]; ?>> </div> 
+<input type="radio" name="soul" value="5" <?php echo $checked['soul'][5]; ?>> </div> </td></tr>
 
-
-<div class="question">Techno:
+<tr><td>Techno</td><td>
+<div class="question">
 <input type="radio" name="techno" value="1" <?php echo $checked['techno'][1]; ?>>
 <input type="radio" name="techno" value="2" <?php echo $checked['techno'][2]; ?>>
 <input type="radio" name="techno" value="3" <?php echo $checked['techno'][3]; ?>>
 <input type="radio" name="techno" value="4" <?php echo $checked['techno'][4]; ?>>
 <input type="radio" name="techno" value="5" <?php echo $checked['techno'][5]; ?>> </div> 
+</td></tr>
 
-
-<div class="question">World:
+<tr><td>World</td><td>
+<div class="question">
 <input type="radio" name="world" value="1" <?php echo $checked['world'][1]; ?>>
 <input type="radio" name="world" value="2" <?php echo $checked['world'][2]; ?>>
 <input type="radio" name="world" value="3" <?php echo $checked['world'][3]; ?>>
 <input type="radio" name="world" value="4" <?php echo $checked['world'][4]; ?>>
-<input type="radio" name="world" value="5" <?php echo $checked['world'][5]; ?>> </div> 
+<input type="radio" name="world" value="5" <?php echo $checked['world'][5]; ?>> </div> </td></tr>
+</table>
 
 
 <input type="submit" value="Verder" />
