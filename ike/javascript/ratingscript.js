@@ -29,6 +29,45 @@ function ouralert(infotext){
 
 function moar(){
 	ouralert("<div class='keuze' id='nieuw'>Iets nieuws</div><div class='keuze' id='hetzelfde'>Meer van hetzelfde</div>")
+	$("#hetzelfde").click(same);
+	$("#nieuw").click(nieuw);
+}
+
+function nieuw(event){
+	$("#alertbox").data("overlay").close();
+	$.post("addtrack/",{newtrack: 'please'} ,function(data){ 
+		$(".wrapper2").append(data)
+			$('.neg:last').click(handle);
+			$('.pos:last').click(handle);
+			$(".contentbox:last").draggable({ containment: "#wrapper", revert:"invalid"});
+			$(".info:last").overlay({
+			mask: {
+				color: '#ebecff',
+				loadSpeed: 200,
+				opacity: 0.9
+			},
+			closeOnClick: false
+			});
+	});
+}
+
+
+function same(event){
+	$("#alertbox").data("overlay").close();
+	$.post("addtrack/", function(data){ 
+		$(".wrapper2").append(data)
+			$('.neg:last').click(handle);
+			$('.pos:last').click(handle);
+			$(".contentbox:last").draggable({ containment: "#wrapper", revert:"invalid"});
+			$(".info:last").overlay({
+			mask: {
+				color: '#ebecff',
+				loadSpeed: 200,
+				opacity: 0.9
+			},
+			closeOnClick: false
+			});
+	});
 }
 
 function handle(event){
