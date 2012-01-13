@@ -9,6 +9,7 @@
 <script type="text/javascript" src="javascript/jquery.ui.core.js"></script>
 <script type="text/javascript" src="javascript/jquery.ui.sortable.js"></script>
 <link rel="stylesheet" href="template/style.css" />
+<link rel="stylesheet" href="template/base/jquery.ui.all.css" />
 <?php
 global $scripts;
 foreach($scripts as $script){
