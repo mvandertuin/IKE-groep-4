@@ -30,4 +30,6 @@ foreach( $genrescores as $id=>$score) {
 }
 
 
+header("Location: ".$frameworkRoot."ddrop3/");
+
 ?>
