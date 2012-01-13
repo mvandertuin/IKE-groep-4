@@ -51,10 +51,6 @@ $query = $db->prepare("SElECT * FROM ike_voorkeur WHERE uID = ".$session['loginI
 
 $query->execute();
 if($query->rowCount()==0) { 
-	if(!isset($_POST['sorted'])) {
-	header('location: '.$frameworkRoot.'introduction/introduction.html');
-	}
-	else {
 	// De array met tags
 	$tagbrei = explode(',',$_POST['sorted']);	
 	$tags = array_slice($tagbrei, 0, 5);
@@ -70,7 +66,6 @@ if($query->rowCount()==0) {
 	$query2-> execute();
 	$artists = $_POST['artist'];
 	
-	}
 }
 else { 
 	$results = $query->fetch(); 
