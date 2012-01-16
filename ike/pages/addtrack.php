@@ -295,6 +295,34 @@ function getAllVotedArtists($id){
 	}
 	return array();
 }
+function getTags($mbid){
+	try {
+		$r = new HttpRequest("http://www.chl43.nl:3000/ws/2/artist/".$mbid."?inc=tags");
+		$h= $r->getHeaders();
+		$h['User-Agent'] = 'IKE G4 0.1';
+		$r->setHeaders($h);
+		$r->send();
+		if ($r->getResponseCode() == 200) {
+			$xmlResponse = simplexml_load_string($r->getResponseBody());
+			$ret = array();
+			if(isset($xmlResponse->artist->{"tag-list"})){
+				foreach($xmlResponse->artist->{"tag-list"}->children() as $tag){
+					if(!empty($tag->name)){
+						$ret[] = strval($tag->name);
+					}
+				}
+			}
+			return $ret;
+		}
+		else {
+			print($r->getResponseCode());
+			return null;
+		}
+	} catch (HttpException $ex) {
+		echo $ex;
+	}
+}
+
 
 function outputTags($id, $voted_on, $n) {
 	$graph = new UserGraph($id);
@@ -327,11 +355,21 @@ function outputTags($id, $voted_on, $n) {
 			$mbid=$track["mbid"];
 		}
 		addShown($mbid);
+		$genr = gettags($mbid);
 	?>
 	<div id="<?=$mbid ?>" class="contentbox">
 		<div class="titlebox"><?=$track["name"] ?></div>
 		<img src="<?=$image ?>" />
 		<div class="titlebox"><?=$name ?></div>
+		<div class="genrebox">
+			<?
+				$kom = "";
+				foreach($genr as $genre){
+					print($kom.$genre);
+					$kom = ", ";
+				}
+			?>
+		</div>
 		<div id="<?=$mbid ?>_-1" class="neg ratingbutton <?=$mbid ?><?php if($rat==-1) echo " votedon"; ?>">-1</div><div id="<?=$mbid ?>_1" class="pos ratingbutton <?=$mbid ?><?php if($rat==1) echo " votedon"; ?>">+1</div><div id="info" rel="#<?=$mbid ?>_overl" class="info ratingbutton">i</div>
 	</div>	
 	
