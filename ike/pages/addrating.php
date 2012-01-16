@@ -24,11 +24,13 @@ function getTags($mbid){
 		if ($r->getResponseCode() == 200) {
 			$xmlResponse = simplexml_load_string($r->getResponseBody());
 			$ret = array();
-			$i = 0;
-			foreach($xmlResponse->artist->{"tag-list"}->children() as $tag){
-				$ret[$i] = $tag->name;
-				$i++;
-			};
+			if(isset($xmlResponse->artist->{"tag-list"})){
+				foreach($xmlResponse->artist->{"tag-list"}->children() as $tag){
+					if(!empty($tag->name)){
+						$ret[] = strval($tag->name);
+					}
+				}
+			}
 			return $ret;
 		}
 		else {
