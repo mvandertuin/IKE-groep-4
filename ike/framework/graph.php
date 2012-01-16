@@ -512,7 +512,7 @@ class UserGraph extends Graph{
 				$edges = $node[1]->getConnections();
 				foreach($edges as $edge){
 					$connectedNode = $edge->otherNode($node[1]);
-					$proposals[] = array($connectedNode->getValue()-$edge->getWeight()+$av, $connectedNode);
+					$proposals[] = array($connectedNode->getValue()-$edge->getWeight()+$av, $connectedNode, 'm');
 				}
 			}
 		}
@@ -520,7 +520,7 @@ class UserGraph extends Graph{
 		//Highest global
 		if($alg&2==2){
 				foreach($this->nodes as $node){
-					$proposals[] = array($node->getValue(), $node);				
+					$proposals[] = array($node->getValue(), $node,'g');				
 				}
 		}	
 		
@@ -595,12 +595,14 @@ class UserGraph extends Graph{
 		if($this->averageEdge==-1){
 			$count = 0;
 			$length = 0;
+			//echo count($this->edges);
 			foreach($this->edges as $e){
-				$count++;
+				$count+=1;
 				$length+=$e->getWeight();
 			}
-			$this->averageEdge =($count==0)?0:$lenght/$count;
+			$this->averageEdge = ($count==0)?(0):($length/$count);
 		}
+		//echo $this->averageEdge;
 		return $this->averageEdge;
 	}
 }
