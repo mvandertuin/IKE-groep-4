@@ -376,6 +376,7 @@ class UserGraph extends Graph{
 	/**
 	 * Constructs a personalized graph
 	 */
+	private $averageEdge = -1;
 	function __construct($userID){
 		//Build basic graph
 		parent::__construct();
@@ -506,11 +507,12 @@ class UserGraph extends Graph{
 		
 		//MST
 		if($alg&1==1){
+			$av = $this->averageEdge();
 			foreach($from as $node){
 				$edges = $node[1]->getConnections();
 				foreach($edges as $edge){
 					$connectedNode = $edge->otherNode($node[1]);
-					$proposals[] = array($connectedNode->getValue()-$edge->getWeight(), $connectedNode);
+					$proposals[] = array($connectedNode->getValue()-$edge->getWeight()+$av, $connectedNode, 'm');
 				}
 			}
 		}
@@ -518,7 +520,7 @@ class UserGraph extends Graph{
 		//Highest global
 		if($alg&2==2){
 				foreach($this->nodes as $node){
-					$proposals[] = array($node->getValue(), $node);				
+					$proposals[] = array($node->getValue(), $node,'g');				
 				}
 		}	
 		
@@ -586,5 +588,21 @@ class UserGraph extends Graph{
 			}
 		}
 		return false;
+	}
+	
+	//Calculates and returns the average edge length
+	private function averageEdge(){
+		if($this->averageEdge==-1){
+			$count = 0;
+			$length = 0;
+			//echo count($this->edges);
+			foreach($this->edges as $e){
+				$count+=1;
+				$length+=$e->getWeight();
+			}
+			$this->averageEdge = ($count==0)?(0):($length/$count);
+		}
+		//echo $this->averageEdge;
+		return $this->averageEdge;
 	}
 }

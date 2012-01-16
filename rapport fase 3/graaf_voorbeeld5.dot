@@ -1,0 +1,22 @@
+Graph G{
+n1 [label="Genre1; 110"];
+n2 [label="Genre2; 140"];
+n3 [label="Genre3; 125"];
+n4 [label="Genre4; 145"];
+n5 [label="Genre5; 118"];
+n7 [label="Genre6; 115"];
+n8 [label="Genre7; 135"];
+n10 [label="Genre8; 119"];
+n12 [label="Genre9; 114"];
+
+n1 -- n2 [label="45",len=1.8];
+n2 -- n3 [label="30",len=1.2];
+n3 -- n4 [label="35",len=1.4];
+n4 -- n5 [label="35",len=1.4];
+n4 -- n10 [label="30",len=1.4];
+n4 -- n8 [label="15",len=0.6];
+n7 -- n8 [label="29",len=1.4];
+n7 -- n10 [label="30",len=1.4];
+n1 -- n12 [label="45",len=1.8];
+n2 -- n12 [label="35",len=1.4];
+}

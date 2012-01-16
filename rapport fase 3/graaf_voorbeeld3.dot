@@ -1,0 +1,13 @@
+Graph G{
+n1 [label="Genre1; 100"];
+n2 [label="Genre2; 110"];
+n3 [label="Genre3; 110"];
+n4 [label="Genre4; 100"];
+n5 [label="Genre5; 100"];
+n1 -- n2 [label="45",len=1.8];
+n1 -- n3 [label="45",len=1.8];
+n2 -- n4 [label="45",len=1.8];
+n2 -- n5 [label="45",len=1.8];
+n2 -- n3 [label="45",len=1.8];
+n4 -- n5 [label="50",len=2];
+}
