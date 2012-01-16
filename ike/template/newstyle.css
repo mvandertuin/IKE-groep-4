@@ -12,6 +12,9 @@ body{
 	font-family: 'Vegur', 'Arial', sans-serif;
 }
 
+h3{
+	font-family: 'VegurBold', 'Arial', sans-serif;
+}
 .header{
 	width:100%;
 	font-size:20pt;
@@ -24,11 +27,18 @@ body{
 	height:100%;
 }
 
+.wrapper2{
+	width:88%;
+	height:100%;
+	margin-left:11%;
+	padding-top:20px;
+}
+
 .deletebox{
 	float:left;
 	background-color:#F3F3F3;
 	height:100%;
-	width:10%;
+	width:9%;
 	font-size:20pt;
 }
 
@@ -47,7 +57,7 @@ body{
 .contentbox{
 	float:left;
 	margin-left:20px;
-	margin-top:20px;
+	margin-bottom:20px;
 	background-color:#EEE;
 	padding:0px;
 	width:120px;;
@@ -67,6 +77,17 @@ body{
 	font-family: 'VegurBold', 'Arial', sans-serif;
 	overflow:hidden;
 	height:18px;
+}
+
+.genrebox{
+	margin:0px;
+	text-align:center;
+	width:100%;
+	float:left;
+	font-family: 'VegurBold', 'Arial', sans-serif;
+	overflow:hidden;
+	height:18px;
+	font-size:10pt;
 }
 
 .ratingbutton{
@@ -147,6 +168,20 @@ a.pref{
 .keuze:hover{
 		background-color:#F3F3F3;
 		color:#CCCCE0;
+
+}
+
+canvas{
+	border:1px solid black;
+	margin-top:10px;
+	float:left;
+}
+
+.infostat{
+	display:block;
+	float:left;
+	width:25%;
+	margin-left:10px;
 }
 /*overlay */
 .simple_overlay {
@@ -191,7 +226,7 @@ a.pref{
 .overlay_title{
 	width:100%;
 	text-align:center;
-	font-family: 'VegurBold', 'Arial', sans-serif;
+	font-family: 'Vegur', 'Arial', sans-serif;
 	font-size:15pt;
 }
 
