@@ -1,22 +1,27 @@
 <!doctype html>
 <html>
 <head>
-	<title><?=$title?></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title><?=$title?></title>
+    <base href="<?=$frameworkRoot?>"/>
+    <?php
+    $scripts_a = array();
+    $scripts_a[] = "jquery-1.7";
+    $scripts_a[] = "jquery-ui-1.8.16.custom";
+    $scripts_a[] = "jquery.ui.core";
+    $scripts_a[] = "jquery.ui.sortable";
+    $scripts_a[] = "jquery.tools.min";
+    global $scripts;
+    $scripts = array_merge($scripts_a, $scripts);
+    ?>
+    <link rel="stylesheet" href="template/newstyle.css"/>
+    <link rel="stylesheet" href="template/base/jquery.ui.all.css"/>
+    <?php
+    foreach ($scripts as $script) {
+        ?>
+        <script type="text/javascript" src="<?=$frameworkRoot?>javascript/<?=$script?>.js"></script>
+        <?php
+    }
+    ?>
 </head>
-<base href="<?=$frameworkRoot?>"></base>
-<script type="text/javascript" src="javascript/jquery-1.7.js"></script>
-<script type="text/javascript" src="javascript/jquery-ui-1.8.16.custom.js"></script>
-<script type="text/javascript" src="javascript/jquery.ui.core.js"></script>
-<script type="text/javascript" src="javascript/jquery.ui.sortable.js"></script>
-<link rel="stylesheet" href="template/style.css" />
-<link rel="stylesheet" href="template/base/jquery.ui.all.css" />
-<?php
-global $scripts;
-foreach($scripts as $script){
-	?>
-	<script type="text/javascript" src="javascript/<?=$script?>.js"></script>
-	<?php	
-}
-?>
 <body>
-<h1><a href="<?=$frameworkRoot?>">IKE</a></h1>
