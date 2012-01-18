@@ -2,9 +2,9 @@
 /*
  *	Global configuration file
  */
- 
+
 //Set maintenance page
-$maintanance = false;
+$maintenance = false;
 
 /*
  *	The relative path of the framework relative to the document root (starting with a slash)
